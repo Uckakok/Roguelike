@@ -43,7 +43,7 @@ void DrawLoop(graphicalInterface* windowContext)
     DungeonLevel CurrentDungeon;
     std::string LevelName = "test.XDD";
     if (!CurrentDungeon.LoadMapFromSave(LevelName)) {
-        MessageBox(nullptr, L"Failed to load save, aborting.", L"Error", MB_OK | MB_ICONERROR);
+        MessageBox(nullptr, L"Failed to load save, render thread is aborting.", L"Error", MB_OK | MB_ICONERROR);
         return;
     }
     windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());

@@ -13,7 +13,9 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
 
     std::string line;
     int BoardSize = 0;
+    int CurrentSize = -1;
     while (std::getline(file, line) && !line.empty()) {
+        int LineSize = 0;
         std::vector<LevelTile> row;
         std::istringstream iss(line);
         int value;
@@ -26,9 +28,22 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
                 tile.bIsWall = false;
             }
             row.push_back(tile);
+            LineSize++;
+        }
+        if (CurrentSize == -1) {
+            CurrentSize = LineSize;
+        }
+        else if (CurrentSize != LineSize){
+            MessageBox(nullptr, L"Corrupted level data!", L"Error", MB_OK | MB_ICONERROR);
+            return false;
         }
         BoardSize++;
         newLevelMap.push_back(row);
+    }
+
+    if (BoardSize != CurrentSize) {
+        MessageBox(nullptr, L"Corrupted level data!", L"Error", MB_OK | MB_ICONERROR);
+        return false;
     }
 
     DeclaredBoardSize = BoardSize;
