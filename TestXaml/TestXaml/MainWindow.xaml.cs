@@ -7,26 +7,16 @@ using System.Windows.Media;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 
 namespace TestXaml
 {
-
-    public enum ItemId
-    {
-        Empty,
-        SuperSword,
-        SuperBow,
-    }
-
     public partial class MainWindow : Window
     {
         private IntPtr otherWindow;
-
         private IntPtr thisWindow;
 
         // Define a delegate for the button state callback function
-        public delegate void HotbarCallback(int Slot, int Id);
+        public delegate void HoverCallback(IntPtr Name, int CurrentHP, int MaxHP);
 
         // Define a delegate for the window handle callback function
         public delegate void WindowHandleCallback(IntPtr windowHandle);
@@ -38,89 +28,57 @@ namespace TestXaml
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // Start rendering OpenGL content
             InitializeOpenGL();
+            Closing += Window_Closing;
+            while (true)
+            {
+                GameTick(Marshal.GetFunctionPointerForDelegate(new HoverCallback(HoverCallbackFunction)));
+            }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Environment.Exit(0); // Exit the program when the window is closing
         }
 
         private void InitializeOpenGL()
         {
             // Call native code to initialize OpenGL and pass the delegates
-            InitializeGame(Marshal.GetFunctionPointerForDelegate(new HotbarCallback(HotbarCallbackFunction)), Marshal.GetFunctionPointerForDelegate(new WindowHandleCallback(WindowCallback)));
+            InitializeGame(Marshal.GetFunctionPointerForDelegate(new WindowHandleCallback(WindowCallback)));
         }
 
-        private string GetImagePath(ItemId id)
+        private void HoverCallbackFunction(IntPtr Name, int CurrentHP, int MaxHP)
         {
-            switch (id)
+            if (CurrentHP == 0 && MaxHP == 0)
             {
-                case ItemId.Empty:
-                    return "empty.png"; // Example path for empty item
-                case ItemId.SuperSword:
-                    return "super_sword.png"; // Example path for super sword
-                case ItemId.SuperBow:
-                    return "super_bow.png"; // Example path for super bow
-                default:
-                    return null; // Return null if item ID not recognized
+                HoverInfoText.Text = "";
             }
-        }
-
-        private void SetButtonImage(System.Windows.Controls.Button button, string imagePath)
-        {
-            if (button != null && !string.IsNullOrEmpty(imagePath))
+            else
             {
-                button.Content = new Image
+                // Marshal the pointer to a C# string
+                string nameString = Marshal.PtrToStringAnsi(Name);
+
+                // Construct the new text
+                string newText = nameString;
+                if (CurrentHP != 0)
                 {
-                    Source = new BitmapImage(new Uri(imagePath, UriKind.Relative))
-                };
+                    newText += "\nHP: " + CurrentHP + "/" + MaxHP;
+                }
+
+                // Print the new text
+                Console.WriteLine(newText);
+
+                // Set the text in HoverInfoText
+                HoverInfoText.Text = newText;
             }
-        }
-
-        private void HotbarCallbackFunction(int Slot, int Id)
-        {
-            //System.Windows.MessageBox.Show($"Item Id: {(ItemId)Id}, Slot: {Slot}");
-
-            switch (Slot)
-            {
-                case 0:
-                    SetButtonImage(btn0, GetImagePath((ItemId)(Id)));
-                    break;
-                case 1:
-                    SetButtonImage(btn1, GetImagePath((ItemId)(Id)));
-                    break;
-                case 2:
-                    SetButtonImage(btn2, GetImagePath((ItemId)(Id)));
-                    break;
-                case 3:
-                    SetButtonImage(btn3, GetImagePath((ItemId)(Id)));
-                    break;
-                case 4:
-                    SetButtonImage(btn4, GetImagePath((ItemId)(Id)));
-                    break;
-                case 5:
-                    SetButtonImage(btn5, GetImagePath((ItemId)(Id)));
-                    break;
-                case 6:
-                    SetButtonImage(btn6, GetImagePath((ItemId)(Id)));
-                    break;
-                case 7:
-                    SetButtonImage(btn7, GetImagePath((ItemId)(Id)));
-                    break;
-                case 8:
-                    SetButtonImage(btn8, GetImagePath((ItemId)(Id)));
-                    break;
-                default:
-                    break;
-            }
-        }
-
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            //empty
         }
 
         // Import native methods
         [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void InitializeGame(IntPtr hotbarCallback, IntPtr windowHandleCallback);
+        private static extern void InitializeGame(IntPtr windowHandleCallback);
+
+        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void GameTick(IntPtr hoverCallback);
 
         // Callback method to receive the window handle from native code
         private void WindowCallback(IntPtr windowHandle)
@@ -164,7 +122,6 @@ namespace TestXaml
         [DllImport("user32.dll")]
         public static extern int SetWindowLong(IntPtr hWnd, int nIndex, winStyle dwNewLong);
 
-
         public static int GWL_STYLE = -16;
 
         public static void SendWindowToBack(IntPtr windowHandle)
@@ -189,5 +146,4 @@ namespace TestXaml
             WS_CAPTION = WS_BORDER | WS_DLGFRAME //window with a title bar
         }
     }
-
 }

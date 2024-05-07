@@ -17,16 +17,10 @@
         </Border>
 
         <!-- Buttons panel -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Name="btn0" Click="Button_Click" Width="64" Height="64"/>
-            <Button Name="btn1" Click="Button_Click" Width="64" Height="64"/>
-            <Button Name="btn2" Click="Button_Click" Width="64" Height="64"/>
-            <Button Name="btn3" Click="Button_Click" Width="64" Height="64"/>
-            <Button Name="btn4" Click="Button_Click" Width="64" Height="64"/>
-            <Button Name="btn5" Click="Button_Click" Width="64" Height="64"/>
-            <Button Name="btn6" Click="Button_Click" Width="64" Height="64"/>
-            <Button Name="btn7" Click="Button_Click" Width="64" Height="64"/>
-            <Button Name="btn8" Click="Button_Click" Width="64" Height="64"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left">
+            <Border Background="Gray" Width="140" Height="60" Margin="30, 0, 0, 10">
+                <TextBlock x:Name="HoverInfoText" Text="HoverInfo" FontSize="14" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4"/>
+            </Border>
         </StackPanel>
     </Grid>
 </Window>

@@ -11,26 +11,36 @@
 #include "glfw3.h"
 #include "glfw3native.h"
 #include <gl/GLU.h>
-#include <process.h>
-#include "GraphicHandler.h"
-#include "Level.h"
 
-// Define a global variable to hold the callback function pointer
-HotbarCallback g_HotbarCallback = nullptr;
-WindowHwndCallback g_WindowCallback = nullptr;
 
-TileToDraw createTileToDraw(int x, int y, TileTypes type) {
-    TileToDraw tile;
-    tile.x = x;
-    tile.y = y;
-    tile.Type = type;
-    return tile;
+GameEngine* GameEngine::instance = nullptr;
+
+GameEngine* GameEngine::GetInstance()
+{
+    if (!instance) {
+        instance = new GameEngine();
+    }
+    return instance;
 }
 
-
-void DrawLoop(graphicalInterface* windowContext)
+void GameEngine::InitializeEngine(WindowHwndCallback WindowCallback)
 {
+    // Store the callback function pointer
+    g_WindowCallback = WindowCallback;
+
+    windowContext = new graphicalInterface();
+
+    if (g_WindowCallback) {
+        HWND hWnd = glfwGetWin32Window(windowContext->GetWindow());
+        g_WindowCallback(hWnd);
+    }
+
     windowContext->MakeContextCurrent();
+    PrepareMap();
+}
+
+void GameEngine::PrepareMap()
+{
     windowContext->blendEnable();
     windowContext->prepareVertexArray();
     windowContext->prepareVertexBuffer();
@@ -40,7 +50,6 @@ void DrawLoop(graphicalInterface* windowContext)
     windowContext->setupMatrices();
 
     //todo: move somewhere else, added for testing
-    DungeonLevel CurrentDungeon;
     std::string LevelName = "test.XDD";
     if (!CurrentDungeon.LoadMapFromSave(LevelName)) {
         MessageBox(nullptr, L"Failed to load save, render thread is aborting.", L"Error", MB_OK | MB_ICONERROR);
@@ -48,55 +57,44 @@ void DrawLoop(graphicalInterface* windowContext)
     }
     windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
     windowContext->NewPlayerCoords(CurrentDungeon.GetPlayerPosition());
+}
 
-    Position PlayerMove = Position(-1, -1);
-    while (true)
-    {
-        windowContext->windowUpdate();
+void GameEngine::RunTick(HoverInfoCallback NewHoverCallback)
+{
+    g_HoverCallback = NewHoverCallback;
+    Position PlayerMove;
+    windowContext->windowUpdate();
+    HoverInfo Info = CurrentDungeon.ConstructHoverInfo(windowContext->GetCursorHoverPosition());
 
-        PlayerMove = windowContext->GetClickPosition();
-        if (PlayerMove.x == -1) continue;
+    if (g_HoverCallback) {
+        g_HoverCallback(Info.Name.c_str(), Info.CurrentHP, Info.MaxHP);
+    }
 
-        //handle action
+    PlayerMove = windowContext->GetClickPosition();
+    if (PlayerMove.x == -1) return;
 
-        if (CurrentDungeon.PerformAction(PlayerMove)) {
-            windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
+    //handle action
+
+    if (CurrentDungeon.PerformAction(PlayerMove)) {
+        CurrentDungeon.PerformEntitiesTurn();
+        windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
+        if (!CurrentDungeon.GetGameEnded()) {
             windowContext->NewPlayerCoords(CurrentDungeon.GetPlayerPosition());
         }
-
-
-
-        //MessageBox(NULL, L"Rendered a frame", L"Info", MB_OK | MB_ICONINFORMATION);
-        //todo: fetch some actual pieces, and set up some frame rate instead of wasting resources
-
-
+        if (CurrentDungeon.GetGameEnded()) {
+            windowContext->windowUpdate();
+            return;
+        }
     }
 }
 
 // Function to initialize game and pass the callback function
-extern "C" __declspec(dllexport) void InitializeGame(HotbarCallback NewHotbarCallback, WindowHwndCallback WindowCallback)
+extern "C" __declspec(dllexport) void InitializeGame(WindowHwndCallback WindowCallback)
 {
+    GameEngine::GetInstance()->InitializeEngine(WindowCallback);
+}
 
-    // Store the callback function pointer
-    g_HotbarCallback = NewHotbarCallback;
-    g_WindowCallback = WindowCallback;
-
-
-    graphicalInterface* windowContext;
-    windowContext = new graphicalInterface();
-
-    if (g_WindowCallback) {
-        HWND hWnd = glfwGetWin32Window(windowContext->GetWindow());
-        g_WindowCallback(hWnd);
-    }
-
-    //load some map before running draw loop
-
-    _beginthread((void(*)(void*))DrawLoop, 0, windowContext);
-
-    if (g_HotbarCallback) {
-        g_HotbarCallback(0, static_cast<int>(ItemTypes::SwordItem));
-        g_HotbarCallback(7, static_cast<int>(ItemTypes::BowItem));
-    }
-
+extern "C" __declspec(dllexport) void GameTick(HoverInfoCallback NewHoverCallback)
+{
+    GameEngine::GetInstance()->RunTick(NewHoverCallback);
 }

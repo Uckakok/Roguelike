@@ -66,4 +66,5 @@ public:
 	void NewPlayerCoords(Position NewPosition);
 	GLFWwindow* GetWindow();
 	Position GetClickPosition();
+	Position GetCursorHoverPosition();
 };

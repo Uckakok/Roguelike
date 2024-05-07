@@ -1,4 +1,5 @@
 #pragma once
+#include<string>
 
 #define LEVEL_SIZE	64
 #define MAGICAL_NUMBER	30	//I literally barelly know meaning of this number, but works nice for 30!
@@ -41,5 +42,15 @@ struct Position {
 	int y;
 	Position() = default;
 	Position(int NewX, int NewY) : x(NewX), y(NewY) { ; };
+	bool operator==(const Position& New) const {
+		return this->x == New.x && this->y == New.y;
+	}
+};
+
+struct HoverInfo {
+	std::string Name;
+	int CurrentHP;
+	int MaxHP;
+	HoverInfo(std::string NewName, int NewCurrentHP, int NewMaxHP) : Name(NewName), CurrentHP(NewCurrentHP), MaxHP(NewMaxHP) { ; };
 };
 

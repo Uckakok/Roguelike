@@ -18,16 +18,7 @@ void graphicalInterface::mouse_button_callback(GLFWwindow* window, int button, i
 {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
-		double xpos, ypos;
-		glfwGetCursorPos(window, &xpos, &ypos);
-		ClickCoordinates.y = (int)round((xpos - MAGICAL_NUMBER) / disBetweenSquares) - 6 + PlayerPosition.y;
-		ClickCoordinates.x = (int)round((ypos - MAGICAL_NUMBER) / disBetweenSquares) - 5 + PlayerPosition.x;
-		std::wstring message = L"Click Coordinates:\n";
-		message += L"X: " + std::to_wstring(ClickCoordinates.x) + L"\n";
-		message += L"Y: " + std::to_wstring(ClickCoordinates.y);
-
-		// Display the coordinates in a message box
-		//MessageBox(nullptr, message.c_str(), L"Click Coordinates", MB_OK | MB_ICONINFORMATION);
+		ClickCoordinates = GetCursorHoverPosition();
 	}
 }
 
@@ -220,4 +211,14 @@ Position graphicalInterface::GetClickPosition()
 	Position temp = ClickCoordinates;
 	ClickCoordinates = Position(-1, -1);
 	return temp;
+}
+
+Position graphicalInterface::GetCursorHoverPosition()
+{
+	double xpos, ypos;
+	glfwGetCursorPos(window, &xpos, &ypos);
+	Position InGameCursorPos;
+	InGameCursorPos = Position((int)round((ypos - MAGICAL_NUMBER) / disBetweenSquares) - 5 + PlayerPosition.x, (int)round((xpos - MAGICAL_NUMBER) / disBetweenSquares) - 6 + PlayerPosition.y);
+
+	return InGameCursorPos;
 }

@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Defines.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="glew.h" />
@@ -451,6 +452,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Entity.cpp" />
     <ClCompile Include="GameEngine.cpp" />
     <ClCompile Include="glm\detail\glm.cpp" />
     <ClCompile Include="GraphicHandler.cpp" />
