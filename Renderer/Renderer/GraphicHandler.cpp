@@ -86,26 +86,13 @@ void graphicalInterface::prepareShaders()
 {
 	shader = new Shader("Resources/Shaders/basic.shader");
 	shader->bind();
-	floorTexture = new Texture("Resources/Textures/FloorTile.png");
-	floorTexture->bind();
 	shader->setUniform1i("u_Texture", 0);
-	wallTexture = new Texture("Resources/Textures/WallTile.png");
-	wallTexture->bind();
-	shader->setUniform1i("u_Texture", 0);
-	PlayerSprite = new Texture("Resources/Textures/PlayerSprite.png");
-	PlayerSprite->bind();
 	background = new Texture("Resources/Textures/Background.png");
 	background->bind();
-	bowSprite = new Texture("Resources/Textures/ItemBow.png");
-	bowSprite->bind();
-	swordSprite = new Texture("Resources/Textures/ItemSword.png");
-	swordSprite->bind();
-	GoblinSprite = new Texture("Resources/Textures/GoblinSprite.png");
-	GoblinSprite->bind();
-	Highlight = new Texture("Resources/Textures/Highlight.png");
-	Highlight->bind();
-
-	shader->setUniform1i("u_Texture", 0);
+	
+	for (int i = 0; i < static_cast<int>(TileTypes::Num); ++i) {
+		Sprites.emplace(static_cast<TileTypes>(i), Sprite(static_cast<TileTypes>(i)));
+	}
 }
 
 void graphicalInterface::unbindStuff() const
@@ -149,32 +136,7 @@ void graphicalInterface::windowUpdate()
 	for (auto& tile : Tiles) {
 		//todo: batch rendering for efficiency
 
-		//find a better way instead of a giant switch case maybe
-		switch (tile.Type) {
-		case TileTypes::Floor:
-			floorTexture->bind();
-			break;
-		case TileTypes::Wall:
-			wallTexture->bind();
-			break;
-		case TileTypes::Player:
-			PlayerSprite->bind();
-			break;
-		case TileTypes::Bow:
-			bowSprite->bind();
-			break;
-		case TileTypes::Sword:
-			swordSprite->bind();
-			break;
-		case TileTypes::Goblin:
-			GoblinSprite->bind();
-			break;
-		case TileTypes::Highlight:
-			Highlight->bind();
-			break;
-		default:
-			continue;
-		}
+		Sprites[tile.Type].Bind();
 		float x = (tile.x - PlayerPosition.x + 5) * disBetweenSquares + MAGICAL_NUMBER;
 		float y = (tile.y - PlayerPosition.y + 6) * disBetweenSquares + MAGICAL_NUMBER;
 		translationB = new glm::vec3(y * 2, (480 - x) * 2, 0);

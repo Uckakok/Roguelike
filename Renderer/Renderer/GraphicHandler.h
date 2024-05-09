@@ -8,6 +8,7 @@
 #include"glm/glm.hpp"
 #include"glfw3.h"
 #include "Defines.h"
+#include <unordered_map>
 #include"Renderer.h"
 
 
@@ -28,14 +29,10 @@ private:
 	indexBuffer* ib;
 	vertexBufferLayout layout;
 	Shader* shader;
-	Texture* floorTexture;
-	Texture* wallTexture;
+	
+	std::unordered_map<TileTypes, Sprite> Sprites;
+
 	Texture* background;
-	Texture* PlayerSprite;
-	Texture* bowSprite;
-	Texture* swordSprite;
-	Texture* GoblinSprite;
-	Texture* Highlight;
 	Renderer renderer;
 	glm::vec3* translationA;
 	glm::vec3* translationB;
