@@ -7,13 +7,37 @@ using System.Windows.Media;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace TestXaml
 {
     public partial class MainWindow : Window
     {
+        private readonly HoverCallback hoverCallbackDelegate;
+        private readonly ShowUseCallback showUseCallbackDelegate;
+
         private IntPtr otherWindow;
         private IntPtr thisWindow;
+
+        [DllImport("winmm.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
+        static extern uint timeSetEvent(uint uDelay, uint uResolution, TimerCallback lpTimeProc, IntPtr dwUser, uint fuEvent);
+
+        [DllImport("winmm.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
+        static extern uint timeKillEvent(uint uTimerID);
+
+        // Define the multimedia timer callback delegate
+        private delegate void TimerCallback(uint uTimerID, uint uMsg, ref IntPtr dwUser, ref IntPtr dw1, ref IntPtr dw2);
+
+        // Define the multimedia timer resolution (1 ms)
+        private const uint TimerResolution = 1;
+
+        // Define the multimedia timer interval (e.g., 16 ms for approximately 60 FPS)
+        private const uint TimerInterval = 16;
+
+        // Define the multimedia timer ID
+        private uint timerId;
+
+        private TimerCallback timerCallbackDelegate;
 
         // Define a delegate for the button state callback function
         public delegate void HoverCallback(IntPtr Name, int CurrentHP, int MaxHP);
@@ -21,64 +45,126 @@ namespace TestXaml
         // Define a delegate for the window handle callback function
         public delegate void WindowHandleCallback(IntPtr windowHandle);
 
+        public delegate void ShowUseCallback(bool bShow);
+
+        bool bShouldUse = false;
+        private bool isGameTickRunning = false;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            hoverCallbackDelegate = new HoverCallback(HoverCallbackFunction);
+            showUseCallbackDelegate = new ShowUseCallback(ShowUseCallbackFunction);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             InitializeOpenGL();
             Closing += Window_Closing;
-            while (true)
+            UseButton.Click += UseButton_Click;
+
+            timerCallbackDelegate = TimerCallbackFunction;
+
+            // Create the multimedia timer
+            timerId = timeSetEvent(TimerInterval, TimerResolution, timerCallbackDelegate, IntPtr.Zero, 1);
+            if (timerId == 0)
             {
-                GameTick(Marshal.GetFunctionPointerForDelegate(new HoverCallback(HoverCallbackFunction)));
+                System.Windows.MessageBox.Show("Failed to create multimedia timer", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+            }
+        }
+
+        private void TimerCallbackFunction(uint uTimerID, uint uMsg, ref IntPtr dwUser, ref IntPtr dw1, ref IntPtr dw2)
+        {
+            if (!isGameTickRunning)
+            {
+                isGameTickRunning = true;
+                // Call the GameTick function
+                Dispatcher.Invoke(() =>
+                {
+                    if (bShouldUse)
+                    {
+                        bShouldUse = false;
+                        UseActivated();
+                    }
+                    GameTick(Marshal.GetFunctionPointerForDelegate(hoverCallbackDelegate), Marshal.GetFunctionPointerForDelegate(showUseCallbackDelegate));
+                });
+                isGameTickRunning = false;
             }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Environment.Exit(0); // Exit the program when the window is closing
+            Dispatcher.Invoke(() =>
+            {
+                if (timerId != 0)
+                {
+                    timeKillEvent(timerId);
+                    timerId = 0;
+                }
+
+                Environment.Exit(0); // Exit the program when the window is closing
+            });
         }
 
         private void InitializeOpenGL()
         {
-            // Call native code to initialize OpenGL and pass the delegates
+            // Call native code to initialize OpenGL and pass the delegate
             InitializeGame(Marshal.GetFunctionPointerForDelegate(new WindowHandleCallback(WindowCallback)));
+        }
+
+        private void ShowUseCallbackFunction(bool bShow)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                UseButton.IsEnabled = bShow;
+                UseText.Foreground = bShow ? Brushes.Black : Brushes.Gray;
+            });
+        }
+
+        private void UseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                bShouldUse = true; 
+            });
         }
 
         private void HoverCallbackFunction(IntPtr Name, int CurrentHP, int MaxHP)
         {
-            if (CurrentHP == 0 && MaxHP == 0)
+            Dispatcher.Invoke(() =>
             {
-                HoverInfoText.Text = "";
-            }
-            else
-            {
-                // Marshal the pointer to a C# string
-                string nameString = Marshal.PtrToStringAnsi(Name);
-
-                // Construct the new text
-                string newText = nameString;
-                if (CurrentHP != 0)
+                if (CurrentHP == 0 && MaxHP == 0)
                 {
-                    newText += "\nHP: " + CurrentHP + "/" + MaxHP;
+                    HoverInfoText.Text = "";
                 }
+                else
+                {
+                    // Marshal the pointer to a C# string
+                    string nameString = Marshal.PtrToStringAnsi(Name);
 
-                // Print the new text
-                Console.WriteLine(newText);
+                    // Construct the new text
+                    string newText = nameString;
+                    if (CurrentHP != 0)
+                    {
+                        newText += "\nHP: " + CurrentHP + "/" + MaxHP;
+                    }
 
-                // Set the text in HoverInfoText
-                HoverInfoText.Text = newText;
-            }
+                    // Set the text in HoverInfoText
+                    HoverInfoText.Text = newText;
+                }
+            });
         }
 
         // Import native methods
         [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void UseActivated();
+        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern void InitializeGame(IntPtr windowHandleCallback);
 
         [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void GameTick(IntPtr hoverCallback);
+        private static extern void GameTick(IntPtr hoverCallback, IntPtr useCallback);
 
         // Callback method to receive the window handle from native code
         private void WindowCallback(IntPtr windowHandle)

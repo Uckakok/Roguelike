@@ -21,6 +21,9 @@
             <Border Background="Gray" Width="140" Height="60" Margin="30, 0, 0, 10">
                 <TextBlock x:Name="HoverInfoText" Text="HoverInfo" FontSize="14" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4"/>
             </Border>
+            <Button x:Name="UseButton" Width="60" Height="40" Margin="30, 0, 0, 30" VerticalAlignment="Center" IsEnabled="False" HorizontalAlignment="Center">
+                <TextBlock x:Name="UseText" Text="USE" FontSize="18" Foreground="Gray" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4" FontWeight="Bold"/>
+            </Button>
         </StackPanel>
     </Grid>
 </Window>

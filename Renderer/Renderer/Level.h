@@ -34,13 +34,16 @@ struct Item {
 };
 
 struct LevelTile {
-	bool bIsWall;
+	Architecture Arch;
 	Entity* Entity = nullptr;
 	std::vector<Item*> Items;
 };
 
 class DungeonLevel {
 public:
+	int LevelIndex;
+	void UseCurrentObject();
+	void SpawnPlayer(bool bFromUp);
 	bool LoadMapFromSave(std::string& SaveName);
 
 	int GetDeclaredBoardSize();
@@ -54,6 +57,7 @@ public:
 	std::vector<Position> GetPath(Position Start, Position Goal);
 	void PerformEntitiesTurn();
 	bool GetGameEnded();
+	bool IsUseAvailable();
 
 	HoverInfo ConstructHoverInfo(Position HoverPosition);
 private:
@@ -63,6 +67,8 @@ private:
 	std::vector<std::vector<LevelTile>> LevelMap;
 
 	int DeclaredBoardSize = 0;
+
+	std::vector<Entity*> EntitiesPendingDeath;
 
 	std::vector<Item> ItemsOnLevel;
 	std::vector<Entity> EntitiesOnLevel;

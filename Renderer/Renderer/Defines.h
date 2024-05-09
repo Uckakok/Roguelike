@@ -4,12 +4,20 @@
 
 #define LEVEL_SIZE	64
 #define MAGICAL_NUMBER	30	//I literally barelly know meaning of this number, but works nice for 30!
+#define EXTENSION	".XDD"
 
 
 enum ItemTypes {
 	Empty,
 	SwordItem,
 	BowItem,
+};
+
+enum Architecture {
+	FloorTile,
+	WallTile,
+	StairsDownTile,
+	StairsUpTile,
 };
 
 
@@ -27,9 +35,65 @@ enum TileTypes {
 	Player,
 	Goblin,
 	Highlight,
+	StairsDown,
+	StairsUp,
 
 	Num
 };
+
+inline std::string ToString(Architecture arch) {
+	switch (arch) {
+	case Architecture::FloorTile:
+		return "floor";
+	case Architecture::WallTile:
+		return "wall";
+	case Architecture::StairsDownTile:
+		return "stairs down";
+	case Architecture::StairsUpTile:
+		return "stairs up";
+	default:
+		return "invalid";
+	}
+}
+
+inline std::string ToString(EntityTypes ent) {
+	switch (ent) {
+	case EntityTypes::PlayerEntity:
+		return "Player";
+	case EntityTypes::GoblinEntity:
+		return "Goblin";
+	default:
+		return "invalid";
+	}
+}
+
+inline TileTypes ToTiletype(EntityTypes ent) {
+	switch (ent) {
+	case EntityTypes::PlayerEntity:
+		return TileTypes::Player;
+	case EntityTypes::GoblinEntity:
+		return TileTypes::Goblin;
+	default:
+		MessageBox(nullptr, L"trying to convert invalid entity to tile type!", L"Error", MB_OK | MB_ICONERROR);
+		return TileTypes::Floor;
+	}
+}
+
+inline TileTypes ToTileType(Architecture arch) {
+	switch (arch) {
+	case Architecture::FloorTile:
+		return TileTypes::Floor;
+	case Architecture::WallTile:
+		return TileTypes::Wall;
+	case Architecture::StairsDownTile:
+		return TileTypes::StairsDown;
+	case Architecture::StairsUpTile:
+		return TileTypes::StairsUp;
+	default:
+		MessageBox(nullptr, L"trying to convert invalid architecture to tile type!", L"Error", MB_OK | MB_ICONERROR);
+		return TileTypes::Floor;
+	}
+}
 
 struct Sprite {
 	TileTypes Type;
@@ -59,6 +123,10 @@ struct Sprite {
 			return "Resources/Textures/GoblinSprite.png";
 		case TileTypes::Highlight:
 			return "Resources/Textures/Highlight.png";
+		case TileTypes::StairsDown:
+			return "Resources/Textures/StairsDown.png";
+		case TileTypes::StairsUp:
+			return "Resources/Textures/StairsUp.png";
 		default:
 			MessageBox(nullptr, L"Tried to load invalid sprite", L"Error", MB_OK | MB_ICONERROR);
 			return "";
