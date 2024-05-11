@@ -11,5 +11,8 @@
 #include "GameEngine.h"
 #include "framework.h"
 #include "GraphicHandler.h"
+#include "Entity.h"
+#include "Defines.h"
+#include "Level.h"
 
 #endif //PCH_H

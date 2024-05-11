@@ -41,9 +41,11 @@ struct LevelTile {
 
 class DungeonLevel {
 public:
+	void RemovePlayer();
+	bool SaveMapToSave();
 	int LevelIndex;
 	void UseCurrentObject();
-	void SpawnPlayer(bool bFromUp);
+	void SpawnPlayer(bool bFromUp, Entity* Player);
 	bool LoadMapFromSave(std::string& SaveName);
 
 	int GetDeclaredBoardSize();
@@ -67,8 +69,6 @@ private:
 	std::vector<std::vector<LevelTile>> LevelMap;
 
 	int DeclaredBoardSize = 0;
-
-	std::vector<Entity*> EntitiesPendingDeath;
 
 	std::vector<Item> ItemsOnLevel;
 	std::vector<Entity> EntitiesOnLevel;

@@ -13,7 +13,7 @@ typedef void(*WindowHwndCallback)(HWND);
 //hover info callback
 typedef void(*HoverInfoCallback)(const char* Name, int CurrentHP, int MaxHP);
 
-typedef void (*ShowUseCallback)(bool bShow);
+typedef void(*ShowUseCallback)(bool bShow);
 
 // Function prototypes
 extern "C" __declspec(dllexport) void InitializeGame(WindowHwndCallback);
@@ -25,6 +25,9 @@ extern "C" __declspec(dllexport) void UseActivated();
 
 class GameEngine {
 private:
+
+    GameEngine() = default;
+
     bool bShouldUse;
 
     // Define a global variable to hold the callback function pointer
@@ -34,7 +37,6 @@ private:
     graphicalInterface* windowContext;
     DungeonLevel CurrentDungeon;
 
-    GameEngine() = default;
 
     // Private destructor to prevent deletion
     ~GameEngine() = default;
@@ -49,7 +51,12 @@ private:
     static GameEngine* instance;
     std::string PlayerName = "test";
 
+    Entity PlayerCharacter; //should be a different class, but works for now
+
+    void SavePlayerState();
+
 public:
+    std::string GetPlayerName();
     void LoadLevel(int LevelNumber);
     static GameEngine* GetInstance();
     void InitializeEngine(WindowHwndCallback WindowCallback);

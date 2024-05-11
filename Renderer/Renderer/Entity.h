@@ -4,9 +4,15 @@
 
 
 class Entity {
+private:
+	int HP;
+	int Damage;
+	bool bIsDead = false;
+	bool bIsPlayer = false;
 public:
-	EntityTypes Type;
+	Entity() = default;
 	Position Location;
+	EntityTypes Type;
 	//stats but who cares
 
 	Entity(EntityTypes NewType, Position NewPosition, int NewHP, int NewDamage) : Type(NewType), Location(NewPosition), HP(NewHP), Damage(NewDamage) { 
@@ -20,9 +26,4 @@ public:
 	bool IsPlayer();
 	int GetDamage();
 	int GetHP();
-private:
-	int HP;
-	int Damage;
-	bool bIsDead = false;
-	bool bIsPlayer = false;
 };

@@ -11,6 +11,7 @@
 #include "glfw3.h"
 #include "glfw3native.h"
 #include <gl/GLU.h>
+#include <fstream>
 
 
 GameEngine* GameEngine::instance = nullptr;
@@ -49,10 +50,18 @@ void GameEngine::PrepareMap()
     windowContext->setupCallbacks();
     windowContext->setupMatrices();
 
-    //todo: move somewhere else, added for testing
-    std::string LevelName = PlayerName;
-    LevelName.append("1"); //level number
-    LevelName.append(EXTENSION);
+    std::string LevelName;
+
+    std::ifstream file("test.XDD");
+    if (!file.is_open()) {
+        LevelName = PlayerName;
+        LevelName.append("1"); //level number
+        LevelName.append(EXTENSION);
+    }
+    else {
+        file >> LevelName;
+    }
+
     if (!CurrentDungeon.LoadMapFromSave(LevelName)) {
         MessageBox(nullptr, L"Failed to load save, aborting.", L"Error", MB_OK | MB_ICONERROR);
         return;
@@ -60,6 +69,29 @@ void GameEngine::PrepareMap()
     CurrentDungeon.LevelIndex = 1;
     windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
     windowContext->NewPlayerCoords(CurrentDungeon.GetPlayerPosition());
+}
+
+void GameEngine::SavePlayerState()
+{
+    std::string SaveName = PlayerName;
+    SaveName.append(EXTENSION);
+
+
+    std::ofstream file(SaveName);
+    if (!file.is_open()) {
+        std::wstring errorMessage = L"Failed to save player data: " + std::wstring(SaveName.begin(), SaveName.end());
+        MessageBox(nullptr, errorMessage.c_str(), L"Error", MB_OK | MB_ICONERROR);
+        return;
+    }
+
+    file << PlayerName << CurrentDungeon.LevelIndex << EXTENSION;
+
+    file.close();
+}
+
+std::string GameEngine::GetPlayerName()
+{
+    return PlayerName;
 }
 
 void GameEngine::LoadLevel(int LevelNumber)
@@ -72,16 +104,24 @@ void GameEngine::LoadLevel(int LevelNumber)
     //todo: remove player from current level
 
     //todo: save current level
+    PlayerCharacter = *CurrentDungeon.GetPlayer();
+    CurrentDungeon.RemovePlayer();
+
+    CurrentDungeon.SaveMapToSave();
 
     if (!CurrentDungeon.LoadMapFromSave(LevelName)) {
+        CurrentDungeon.SpawnPlayer(PreviousIndex >= LevelNumber, &PlayerCharacter);
+        SavePlayerState();
         MessageBox(nullptr, L"Failed to load save, aborting.", L"Error", MB_OK | MB_ICONERROR);
         return;
     }
     CurrentDungeon.LevelIndex = LevelNumber;
-    CurrentDungeon.SpawnPlayer(PreviousIndex < LevelNumber);
+    CurrentDungeon.SpawnPlayer(PreviousIndex < LevelNumber, &PlayerCharacter);
     windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
     windowContext->NewPlayerCoords(CurrentDungeon.GetPlayerPosition());
 
+    SavePlayerState();
+    CurrentDungeon.SaveMapToSave();
 }
 
 void GameEngine::RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback NewShowUseCallback)

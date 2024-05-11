@@ -152,6 +152,9 @@ struct Position {
 	bool operator==(const Position& New) const {
 		return this->x == New.x && this->y == New.y;
 	}
+	bool operator!=(const Position& New) const {
+		return this->x != New.x || this->y != New.y;
+	}
 };
 
 struct HoverInfo {
