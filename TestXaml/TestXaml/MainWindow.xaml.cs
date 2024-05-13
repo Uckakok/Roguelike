@@ -50,10 +50,15 @@ namespace TestXaml
         bool bShouldUse = false;
         private bool isGameTickRunning = false;
 
+        private int frameCount = 0;
+        private DateTime lastCheckTime = DateTime.Now;
+        private int fps = 0;
+
         public MainWindow()
         {
             InitializeComponent();
-
+            
+            
             hoverCallbackDelegate = new HoverCallback(HoverCallbackFunction);
             showUseCallbackDelegate = new ShowUseCallback(ShowUseCallbackFunction);
         }
@@ -89,6 +94,17 @@ namespace TestXaml
                         UseActivated();
                     }
                     GameTick(Marshal.GetFunctionPointerForDelegate(hoverCallbackDelegate), Marshal.GetFunctionPointerForDelegate(showUseCallbackDelegate));
+
+                    frameCount++;
+                    var currentTime = DateTime.Now;
+                    var elapsedTime = currentTime - lastCheckTime;
+                    if (elapsedTime.TotalSeconds >= 1)
+                    {
+                        fps = (int)(frameCount / elapsedTime.TotalSeconds);
+                        frameCount = 0;
+                        lastCheckTime = currentTime;
+                        FpsText.Text = "FPS: " + fps.ToString();
+                    }
                 });
                 isGameTickRunning = false;
             }

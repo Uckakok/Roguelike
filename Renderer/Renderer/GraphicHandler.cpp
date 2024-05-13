@@ -137,8 +137,8 @@ void graphicalInterface::windowUpdate()
 		//todo: batch rendering for efficiency
 
 		Sprites[tile.Type].Bind();
-		float x = (tile.x - PlayerPosition.x + 5) * disBetweenSquares + MAGICAL_NUMBER;
-		float y = (tile.y - PlayerPosition.y + 6) * disBetweenSquares + MAGICAL_NUMBER;
+		float x = (tile.x - PlayerPosition.x + 5) * disBetweenSquares + TILE_MIDDLE;
+		float y = (tile.y - PlayerPosition.y + 6) * disBetweenSquares + TILE_MIDDLE;
 		translationB = new glm::vec3(y * 2, (480 - x) * 2, 0);
 		glm::mat4 model = glm::translate(glm::mat4(1.0f), (const glm::vec3)*translationB);
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), (const glm::vec3)*scaleB);
@@ -180,7 +180,7 @@ Position graphicalInterface::GetCursorHoverPosition()
 	double xpos, ypos;
 	glfwGetCursorPos(window, &xpos, &ypos);
 	Position InGameCursorPos;
-	InGameCursorPos = Position((int)round((ypos - MAGICAL_NUMBER) / disBetweenSquares) - 5 + PlayerPosition.x, (int)round((xpos - MAGICAL_NUMBER) / disBetweenSquares) - 6 + PlayerPosition.y);
+	InGameCursorPos = Position((int)round((ypos - TILE_MIDDLE) / disBetweenSquares) - 5 + PlayerPosition.x, (int)round((xpos - TILE_MIDDLE) / disBetweenSquares) - 6 + PlayerPosition.y);
 
 	return InGameCursorPos;
 }

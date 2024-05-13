@@ -28,9 +28,10 @@ void DungeonLevel::SpawnPlayer(bool bFromUp, Entity* Player)
         for (int i = 0; i < DeclaredBoardSize; ++i) {
             for (int j = 0; j < DeclaredBoardSize; ++j) {
                 if (LevelMap[i][j].Arch == Architecture::StairsUpTile) {
-                    EntitiesOnLevel.push_back(*Player);
+                    EntitiesOnLevel.push_back(new Entity(*Player));
                     GetPlayer()->Location = Position(i, j);
                     LevelMap[i][j].Entity = GetPlayer();
+                    MonsterQueue[0].insert(MonsterQueue[0].begin(), GetPlayer());
                     return;
                 }
             }
@@ -40,9 +41,10 @@ void DungeonLevel::SpawnPlayer(bool bFromUp, Entity* Player)
         for (int i = 0; i < DeclaredBoardSize; ++i) {
             for (int j = 0; j < DeclaredBoardSize; ++j) {
                 if (LevelMap[i][j].Arch == Architecture::StairsDownTile) {
-                    EntitiesOnLevel.push_back(*Player);
+                    EntitiesOnLevel.push_back(new Entity(*Player));
                     GetPlayer()->Location = Position(i, j);
                     LevelMap[i][j].Entity = GetPlayer();
+                    MonsterQueue[0].insert(MonsterQueue[0].begin(), GetPlayer());
                     return;
                 }
             }
@@ -61,6 +63,10 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
     }
 
     //save current level
+
+    for (auto* ent : EntitiesOnLevel) {
+        delete ent;
+    }
 
     EntitiesOnLevel.clear();
     ItemsOnLevel.clear();
@@ -109,7 +115,7 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
         iss >> entityID >> x >> y >> HP >> Damage;
 
         if (entityID != 0) {
-            EntitiesOnLevel.push_back(Entity(static_cast<EntityTypes>(entityID), Position(x, y), HP, Damage));
+            EntitiesOnLevel.push_back(new Entity(static_cast<EntityTypes>(entityID), Position(x, y), HP, Damage));
         }
     }
 
@@ -121,17 +127,53 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
     }
 
     for (auto& ent : EntitiesOnLevel) {
-        newLevelMap[ent.Location.x][ent.Location.y].Entity = &ent;
+        newLevelMap[ent->Location.x][ent->Location.y].Entity = ent;
     }
 
     for (auto& it : ItemsOnLevel) {
         newLevelMap[it.Location.x][it.Location.y].Items.push_back(&it);
     }
 
+    std::vector<Entity*> AllEnts;
 
+    for (auto& ent : EntitiesOnLevel) {
+        if (ent->IsPlayer()) continue;
+        AllEnts.push_back(ent);
+    }
+    AllEnts.insert(AllEnts.begin(), GetPlayer());
+
+    //std::stringstream ss;
+    //ss << "AllEnts Contents:\n";
+
+    //// Iterate through AllEnts
+    //for (const auto& ent : AllEnts) {
+    //    ss << "Entity " << ToString(ent->Type) << ", IsPlayer: " << (ent->IsPlayer() ? "true" : "false") << "\n";
+    //}
+
+    //// Convert stringstream to string
+    //std::string message = ss.str();
+
+    //// Display the message box
+    //MessageBox(NULL, std::wstring(message.begin(), message.end()).c_str(), L"AllEnts Contents", MB_OK);
+
+    MonsterQueue.push_back(AllEnts);
 
     LevelMap = std::move(newLevelMap);
     return true;
+}
+
+void DungeonLevel::PutInQueue(int PositionOffset, Entity* ent)
+{
+    while (MonsterQueue.size() <= PositionOffset) {
+        std::vector<Entity*> NewTurn;
+        MonsterQueue.push_back(NewTurn);
+    }
+    if (ent->IsPlayer()) {
+        MonsterQueue[PositionOffset].insert(MonsterQueue[PositionOffset].begin(), ent);
+    }
+    else {
+        MonsterQueue[PositionOffset].push_back(ent);
+    }
 }
 
 void DungeonLevel::ConnectAreas(std::vector<std::vector<Position>>& Areas) {
@@ -167,8 +209,8 @@ void DungeonLevel::GenerateMap()
         GeneratedMap.push_back(Row);
     }
 
-    int NumRectangles = 10; //generate them somehow
-    int MaxSize = 10; //generate this somehow
+    int NumRectangles = 24; //generate them somehow
+    int MaxSize = 6; //generate this somehow
     int MinSize = 3;
     srand(time(0));
 
@@ -234,7 +276,9 @@ void DungeonLevel::GenerateMap()
     }
     ValidTilesForSpawning[Index]->Arch = Architecture::StairsUpTile;
 
-
+    for (auto* ent : EntitiesOnLevel) {
+        delete ent;
+    }
     EntitiesOnLevel.clear();
     ItemsOnLevel.clear();
 
@@ -243,9 +287,18 @@ void DungeonLevel::GenerateMap()
     for (int i = 0; i < GoblinCount; ++i) {
         Index = rand() % ValidTilesForSpawning.size();
         if (ValidTilesForSpawning[Index]->Arch == Architecture::StairsUpTile || ValidTilesForSpawning[Index]->Entity) continue;
-        EntitiesOnLevel.push_back(Entity(EntityTypes::GoblinEntity, ValidTilesForSpawning[Index]->Coordinates, 100, 10));
-        ValidTilesForSpawning[Index]->Entity = &EntitiesOnLevel.back();
+        EntitiesOnLevel.push_back(new Entity(EntityTypes::GoblinEntity, ValidTilesForSpawning[Index]->Coordinates, 100, 10));
+        ValidTilesForSpawning[Index]->Entity = EntitiesOnLevel.back();
     }
+
+    
+    std::vector<Entity*> AllEnts;
+
+    for (auto& ent : EntitiesOnLevel) {
+        AllEnts.push_back(ent);
+    }
+
+    MonsterQueue.push_back(AllEnts);
 
 }
 
@@ -332,7 +385,7 @@ bool DungeonLevel::SaveMapToSave()
 
     // Save the entities
     for (auto& ent : EntitiesOnLevel) {
-        file << static_cast<int>(ent.Type) << ' ' << ent.Location.x << ' ' << ent.Location.y << ' ' << ent.GetHP() << ' ' << ent.GetDamage() << std::endl;
+        file << static_cast<int>(ent->Type) << ' ' << ent->Location.x << ' ' << ent->Location.y << ' ' << ent->GetHP() << ' ' << ent->GetDamage() << std::endl;
     }
 
     file << std::endl;
@@ -391,11 +444,11 @@ std::vector<TileToDraw> DungeonLevel::GatherTilesForRender()
 
     for (auto& mon : EntitiesOnLevel)
     {
-        if (mon.Type == EntityTypes::None) {
+        if (mon->Type == EntityTypes::None) {
             MessageBox(nullptr, L"Invalid entity present on level", L"Error", MB_OK | MB_ICONERROR);
             continue;
         }
-        GatheredTiles.push_back(TileToDraw(mon.Location.x, mon.Location.y, ToTiletype(mon.Type)));
+        GatheredTiles.push_back(TileToDraw(mon->Location.x, mon->Location.y, ToTiletype(mon->Type)));
     }
 
     //player died
@@ -444,6 +497,13 @@ bool DungeonLevel::PerformAction(Position PlayerMove)
         if (EntityOnTile->IsDead()) {
             KillEntityOnPosition(PlayerMove);
         }
+        PutInQueue(5, PlayerEntity);
+        for (auto it = MonsterQueue.front().begin(); it != MonsterQueue.front().end(); ++it) {
+            if (*it == GetPlayer()) {
+                MonsterQueue.front().erase(it);
+                break;
+            }
+        }
         return true;
     }
 
@@ -451,6 +511,13 @@ bool DungeonLevel::PerformAction(Position PlayerMove)
     PlayerEntity->Location = PlayerMove;
     LevelMap[PlayerEntity->Location.x][PlayerEntity->Location.y].Entity = PlayerEntity;
 
+    PutInQueue(4, PlayerEntity);
+    for (auto it = MonsterQueue.front().begin(); it != MonsterQueue.front().end(); ++it) {
+        if (*it == GetPlayer()) {
+            MonsterQueue.front().erase(it);
+            break;
+        }
+    }
     return true;
 }
 
@@ -458,6 +525,7 @@ bool DungeonLevel::MoveEntity(Entity* EntityToMove)
 {
     if (!EntityToMove) {
         MessageBox(nullptr, L"Tried to move invalid entity", L"Error", MB_OK | MB_ICONERROR);
+        //don't try to move it ever again
         return false;
     }
 
@@ -466,6 +534,7 @@ bool DungeonLevel::MoveEntity(Entity* EntityToMove)
     if (PathToTake.size() < 2) {
         // invalid path. No way to reach the goal
         //MessageBox(nullptr, L"No valid path to move the entity", L"Error", MB_OK | MB_ICONERROR);
+        PutInQueue(4, EntityToMove);
         return false;
     }
 
@@ -484,6 +553,7 @@ bool DungeonLevel::MoveEntity(Entity* EntityToMove)
             }
         }
 
+        PutInQueue(8, EntityToMove);
         return true;
     }
 
@@ -491,6 +561,7 @@ bool DungeonLevel::MoveEntity(Entity* EntityToMove)
     EntityToMove->Location = NextMove;
     LevelMap[EntityToMove->Location.x][EntityToMove->Location.y].Entity = EntityToMove;
 
+    PutInQueue(6, EntityToMove);
     return true;
 }
 
@@ -498,9 +569,9 @@ Entity* DungeonLevel::GetPlayer()
 {
     for (auto& mon : EntitiesOnLevel)
     {
-        if (mon.Type == EntityTypes::PlayerEntity)
+        if (mon->Type == EntityTypes::PlayerEntity)
         {
-            return &mon;
+            return mon;
         }
     }
 
@@ -609,11 +680,35 @@ std::vector<Position> DungeonLevel::GetPath(Position Start, Position Goal, bool 
 
 void DungeonLevel::PerformEntitiesTurn()
 {
-    for (auto& ent : EntitiesOnLevel) {
-        if (ent.IsPlayer()) continue;
-        if (bIsGameEnded) break;
+    //std::stringstream ss;
+    //ss << "MonsterQueue Contents:\n";
 
-        MoveEntity(&ent);
+    //// Iterate through the MonsterQueue
+    //for (size_t i = 0; i < MonsterQueue.size(); ++i) {
+    //    ss << "Queue " << i << ": ";
+    //    for (size_t j = 0; j < MonsterQueue[i].size(); ++j) {
+    //        ss << "Entity " << ToString(MonsterQueue[i][j]->Type);
+    //        if (j != MonsterQueue[i].size() - 1) {
+    //            ss << ", ";
+    //        }
+    //    }
+    //    ss << "\n";
+    //}
+
+    //// Convert stringstream to string
+    //std::string message = ss.str();
+
+    //// Display the message box
+    //MessageBox(NULL, std::wstring(message.begin(), message.end()).c_str(), L"MonsterQueue Contents", MB_OK);
+
+    while (MonsterQueue.front().empty() || !MonsterQueue.front().front()->IsPlayer()) {
+        for (auto& ent : MonsterQueue.front()) {
+            if (ent->IsPlayer()) continue; //or just crash. Shouldn't happen
+            if (bIsGameEnded) break;
+
+            MoveEntity(ent);
+        }
+        MonsterQueue.erase(MonsterQueue.begin());
     }
 }
 
@@ -657,25 +752,25 @@ void DungeonLevel::KillEntityOnPosition(Position Location)
     // Set the entity pointer in the LevelMap to nullptr
     LevelMap[Location.x][Location.y].Entity = nullptr;
 
-    std::vector<Position> CurrentEntities;
-    for (auto& ent : EntitiesOnLevel) {
-        if (ent.Location != Location) CurrentEntities.push_back(ent.Location);
-    }
-
     // Erase the entity from the EntitiesOnLevel vector
     for (auto it = EntitiesOnLevel.begin(); it != EntitiesOnLevel.end(); ++it) {
-        if (it->Location == Location) {
+        if ((*it)->Location == Location) {
             EntitiesOnLevel.erase(it);
             break;
         }
     }
 
-    for (auto& ent : CurrentEntities) {
-        LevelMap[ent.x][ent.y].Entity = nullptr;
-    }
-
-    for (auto& ent : EntitiesOnLevel) {
-        LevelMap[ent.Location.x][ent.Location.y].Entity = &ent;
+    //remove this entity from queue
+    for (auto& queue : MonsterQueue) {
+        for (auto it = queue.begin(); it != queue.end();) {
+            if ((*it)->Location == Location) {
+                delete* it;
+                it = queue.erase(it); // Update iterator after erasing
+            }
+            else {
+                ++it;
+            }
+        }
     }
 }
 

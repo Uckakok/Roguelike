@@ -65,17 +65,19 @@ public:
 
 	HoverInfo ConstructHoverInfo(Position HoverPosition);
 private:
+	void PutInQueue(int PositionOffset, Entity* ent);
 	void ConnectAreas(std::vector<std::vector<Position>>& Areas);
 	std::vector<Position> FindAllConnected(Position StartPos, std::vector<std::vector<LevelTile>>* NewMap);
 	bool bIsGameEnded = false;
 	void KillEntityOnPosition(Position Location);
 	bool IsMoveLegal(Position PlayerMove);
 	std::vector<std::vector<LevelTile>> LevelMap;
+	std::vector<std::vector<Entity*>> MonsterQueue;
 
 	int DeclaredBoardSize = 0;
 
 	std::vector<Item> ItemsOnLevel;
-	std::vector<Entity> EntitiesOnLevel;
+	std::vector<Entity*> EntitiesOnLevel;
 
 
 

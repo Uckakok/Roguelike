@@ -110,9 +110,7 @@ void GameEngine::LoadLevel(int LevelNumber)
     LevelName.append(EXTENSION);
 
     int PreviousIndex = CurrentDungeon.LevelIndex;
-    //todo: remove player from current level
 
-    //todo: save current level
     PlayerCharacter = *CurrentDungeon.GetPlayer();
     CurrentDungeon.RemovePlayer();
 

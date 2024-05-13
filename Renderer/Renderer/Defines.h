@@ -3,7 +3,7 @@
 #include"Texture.h"
 
 #define LEVEL_SIZE	32
-#define MAGICAL_NUMBER	30	//I literally barelly know meaning of this number, but works nice for 30!
+#define TILE_MIDDLE	32
 #define EXTENSION	".XDD"
 
 
