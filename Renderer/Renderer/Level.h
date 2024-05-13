@@ -34,6 +34,7 @@ struct Item {
 };
 
 struct LevelTile {
+	Position Coordinates;
 	Architecture Arch;
 	Entity* Entity = nullptr;
 	std::vector<Item*> Items;
@@ -47,6 +48,7 @@ public:
 	void UseCurrentObject();
 	void SpawnPlayer(bool bFromUp, Entity* Player);
 	bool LoadMapFromSave(std::string& SaveName);
+	void GenerateMap();
 
 	int GetDeclaredBoardSize();
 	std::vector<TileToDraw> GatherTilesForRender();
@@ -56,13 +58,15 @@ public:
 	Entity* GetPlayer();
 	Entity* GetEntityOnTile(Position Location);
 
-	std::vector<Position> GetPath(Position Start, Position Goal);
+	std::vector<Position> GetPath(Position Start, Position Goal, bool bIgnoreAll = false);
 	void PerformEntitiesTurn();
 	bool GetGameEnded();
 	bool IsUseAvailable();
 
 	HoverInfo ConstructHoverInfo(Position HoverPosition);
 private:
+	void ConnectAreas(std::vector<std::vector<Position>>& Areas);
+	std::vector<Position> FindAllConnected(Position StartPos, std::vector<std::vector<LevelTile>>* NewMap);
 	bool bIsGameEnded = false;
 	void KillEntityOnPosition(Position Location);
 	bool IsMoveLegal(Position PlayerMove);

@@ -55,8 +55,8 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
 {
     std::ifstream file(SaveName);
     if (!file.is_open()) {
-        std::string errorMessage = "Failed to load dungeon save: " + SaveName;
-        MessageBox(nullptr, std::wstring(errorMessage.begin(), errorMessage.end()).c_str(), L"Error", MB_OK | MB_ICONERROR);
+        //std::string errorMessage = "Failed to load dungeon save: " + SaveName;
+        //MessageBox(nullptr, std::wstring(errorMessage.begin(), errorMessage.end()).c_str(), L"Error", MB_OK | MB_ICONERROR);
         return false;
     }
 
@@ -132,6 +132,171 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
 
     LevelMap = std::move(newLevelMap);
     return true;
+}
+
+void DungeonLevel::ConnectAreas(std::vector<std::vector<Position>>& Areas) {
+    // Iterate over all pairs of areas
+    std::vector<Position> Tunnels;
+    for (size_t i = 0; i < Areas.size(); ++i) {
+        for (size_t j = i + 1; j < Areas.size(); ++j) {
+            // Find the shortest path between the current pair of areas
+            std::vector<Position> ShortestPath = GetPath(Areas[i][0], Areas[j][0], true);
+            for (int i = 0; i < ShortestPath.size(); ++i) {
+                Tunnels.push_back(ShortestPath[i]);
+            }
+        }
+    }
+
+    for (auto& pos : Tunnels) {
+        LevelMap[pos.x][pos.y].Arch = Architecture::FloorTile;
+    }
+}
+
+void DungeonLevel::GenerateMap()
+{
+    std::vector<std::vector<LevelTile>> GeneratedMap;
+
+    //generate full wall map
+    for (int i = 0; i < LEVEL_SIZE; ++i) {
+        std::vector<LevelTile> Row;
+        for (int j = 0; j < LEVEL_SIZE; ++j) {
+            LevelTile NewTile;
+            NewTile.Arch = Architecture::WallTile;
+            Row.push_back(NewTile);
+        }
+        GeneratedMap.push_back(Row);
+    }
+
+    int NumRectangles = 10; //generate them somehow
+    int MaxSize = 10; //generate this somehow
+    int MinSize = 3;
+    srand(time(0));
+
+    //add random rectangles on the map
+    for (int r = 0; r < NumRectangles; ++r) {
+        // Random position for the top-left corner of the rectangle
+        int startX = rand() % (LEVEL_SIZE - MaxSize);
+        int startY = rand() % (LEVEL_SIZE - MaxSize);
+
+        // Random size for the rectangle
+        int width = MinSize + rand() % (MaxSize - MinSize + 1);
+        int height = MinSize + rand() % (MaxSize - MinSize + 1);
+
+        // Fill the rectangle with Architecture::Floor
+        for (int i = startX; i < startX + width; ++i) {
+            for (int j = startY; j < startY + height; ++j) {
+                GeneratedMap[i][j].Arch = Architecture::FloorTile;
+            }
+        }
+    }
+
+    DeclaredBoardSize = LEVEL_SIZE;
+
+    std::vector<std::vector<Position>> Areas;
+
+    for (int i = 0; i < LEVEL_SIZE; ++i) {
+        for (int j = 0; j < LEVEL_SIZE; ++j) {
+            if (GeneratedMap[i][j].Arch == Architecture::FloorTile) {
+                Areas.push_back(FindAllConnected(Position(i, j), &GeneratedMap));
+            }
+        }
+    }
+
+    LevelMap = std::move(GeneratedMap);
+    ConnectAreas(Areas);
+
+    //fix up the board after calculating areas
+    for (int i = 0; i < LEVEL_SIZE; ++i) {
+        for (int j = 0; j < LEVEL_SIZE; ++j) {
+            if (LevelMap[i][j].Arch == Architecture::Visited) {
+                LevelMap[i][j].Arch = Architecture::FloorTile;
+            }
+        }
+    }
+    
+    //spawn 'things'
+    //gather all tiles
+   std::vector<LevelTile*> ValidTilesForSpawning;
+    for (int i = 0; i < LEVEL_SIZE; ++i) {
+        for (int j = 0; j < LEVEL_SIZE; ++j) {
+            if (LevelMap[i][j].Arch == Architecture::FloorTile) {
+                LevelMap[i][j].Coordinates = Position(i, j);
+                ValidTilesForSpawning.push_back(&LevelMap[i][j]);
+            }
+        }
+    }
+
+    //generate stairs
+    ValidTilesForSpawning[rand() % ValidTilesForSpawning.size()]->Arch = Architecture::StairsDownTile;
+    int Index = rand() % ValidTilesForSpawning.size();
+    while (ValidTilesForSpawning[Index]->Arch == StairsDownTile) {
+        Index = rand() % ValidTilesForSpawning.size();
+    }
+    ValidTilesForSpawning[Index]->Arch = Architecture::StairsUpTile;
+
+
+    EntitiesOnLevel.clear();
+    ItemsOnLevel.clear();
+
+    int GoblinCount = rand() % 10 + 5;
+
+    for (int i = 0; i < GoblinCount; ++i) {
+        Index = rand() % ValidTilesForSpawning.size();
+        if (ValidTilesForSpawning[Index]->Arch == Architecture::StairsUpTile || ValidTilesForSpawning[Index]->Entity) continue;
+        EntitiesOnLevel.push_back(Entity(EntityTypes::GoblinEntity, ValidTilesForSpawning[Index]->Coordinates, 100, 10));
+        ValidTilesForSpawning[Index]->Entity = &EntitiesOnLevel.back();
+    }
+
+}
+
+
+std::vector<Position> DungeonLevel::FindAllConnected(Position StartPos, std::vector<std::vector<LevelTile>>* NewMap)
+{
+    std::vector<Position> Connected;
+
+    // Check if the starting position is a floor tile
+    if (NewMap->at(StartPos.x)[StartPos.y].Arch != Architecture::FloorTile) {
+        MessageBox(nullptr, L"Error when generating map!", L"Error", MB_OK | MB_ICONERROR);
+        return Connected;
+    }
+
+    // Define the possible movement directions (including diagonals)
+    std::vector<Position> directions = {
+        {1, 0}, {-1, 0}, {0, 1}, {0, -1}, // Straight movement
+        {1, 1}, {1, -1}, {-1, 1}, {-1, -1} // Diagonal movement
+    };
+
+    // Create a queue for BFS
+    std::queue<Position> queue;
+    queue.push(StartPos);
+
+    // Mark the starting position as visited
+    NewMap->at(StartPos.x)[StartPos.y].Arch = Visited;
+
+    // Perform BFS
+    while (!queue.empty()) {
+        // Get the front position from the queue
+        Position currentPos = queue.front();
+        queue.pop();
+
+        // Add the current position to the connected vector
+        Connected.push_back(currentPos);
+
+        // Explore all neighboring tiles
+        for (const auto& dir : directions) {
+            int nx = currentPos.x + dir.x;
+            int ny = currentPos.y + dir.y;
+            // Check if the neighboring position is within bounds and is a floor tile
+            if (nx >= 0 && nx < NewMap->size() && ny >= 0 && ny < NewMap->at(0).size() && NewMap->at(nx)[ny].Arch == Architecture::FloorTile) {
+                // Mark the neighboring position as visited
+                NewMap->at(nx)[ny].Arch = Visited;
+                // Add the neighboring position to the queue for further exploration
+                queue.push({ nx, ny });
+            }
+        }
+    }
+
+    return Connected;
 }
 
 void DungeonLevel::RemovePlayer()
@@ -352,10 +517,11 @@ double CalculateDistance(const Position& a, const Position& b) {
     return std::abs(a.x - b.x) + std::abs(a.y - b.y);
 }
 
-bool IsValid(const Position& pos, const std::vector<std::vector<LevelTile>>& levelMap) {
+bool IsValid(const Position& pos, const std::vector<std::vector<LevelTile>>& levelMap, bool bIgnoreAll) {
     if (pos.x < 0 || pos.x >= static_cast<int>(levelMap.size()) || pos.y < 0 || pos.y >= static_cast<int>(levelMap[0].size())) {
         return false; // Position is out of bounds
     }
+    if (bIgnoreAll) return true;
     return levelMap[pos.x][pos.y].Arch != Architecture::WallTile && (!levelMap[pos.x][pos.y].Entity || levelMap[pos.x][pos.y].Entity->IsPlayer()); // Position is not a wall and doesn't have entity
 }
 
@@ -369,12 +535,17 @@ std::vector<Position> ReconstructPath(Node* current) {
     return path;
 }
 
-std::vector<Position> DungeonLevel::GetPath(Position Start, Position Goal)
+std::vector<Position> DungeonLevel::GetPath(Position Start, Position Goal, bool bIgnoreAll)
 {
 
     // Validate Goal
-    if (!IsValid(Goal, LevelMap)) {
+    if (!IsValid(Goal, LevelMap, bIgnoreAll)) {
         return {}; // Goal position is not valid
+    }
+
+    if (CalculateDistance(Start, Goal) > 11 && !bIgnoreAll)
+    {
+        return {}; //too far away. No reason to waste resources
     }
 
     std::vector<Position> directions = {
@@ -404,11 +575,20 @@ std::vector<Position> DungeonLevel::GetPath(Position Start, Position Goal)
             return path;
         }
 
+        if (current->gCost > 12 && !bIgnoreAll) {
+            // Clean up memory
+            while (!openSet.empty()) {
+                delete openSet.top();
+                openSet.pop();
+            }
+            return {}; // Path length exceeds limit
+        }
+
         visited[current->pos.x][current->pos.y] = true;
 
         for (const auto& dir : directions) {
             Position neighborPos = { current->pos.x + dir.x, current->pos.y + dir.y };
-            if (!IsValid(neighborPos, LevelMap) || visited[neighborPos.x][neighborPos.y]) {
+            if (!IsValid(neighborPos, LevelMap, bIgnoreAll) || visited[neighborPos.x][neighborPos.y]) {
                 continue;
             }
 
@@ -470,6 +650,7 @@ HoverInfo DungeonLevel::ConstructHoverInfo(Position HoverPosition)
 
     return HoverInfo("Error", 0, 0);
 }
+
 
 void DungeonLevel::KillEntityOnPosition(Position Location)
 {

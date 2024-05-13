@@ -123,36 +123,36 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Textures\Background.png">
+    <None Include="Resources\Textures\Background.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\Textures\FloorTile.png">
+    </None>
+    <None Include="Resources\Textures\FloorTile.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\Textures\GoblinSprite.png">
+    </None>
+    <None Include="Resources\Textures\GoblinSprite.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\Textures\Highlight.png">
+    </None>
+    <None Include="Resources\Textures\Highlight.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\Textures\ItemBow.png">
+    </None>
+    <None Include="Resources\Textures\ItemBow.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\Textures\ItemSword.png">
+    </None>
+    <None Include="Resources\Textures\ItemSword.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\Textures\PlayerSprite.png">
+    </None>
+    <None Include="Resources\Textures\PlayerSprite.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\Textures\StairsDown.png">
+    </None>
+    <None Include="Resources\Textures\StairsDown.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\Textures\StairsUp.png">
+    </None>
+    <None Include="Resources\Textures\StairsUp.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\Textures\WallTile.png">
+    </None>
+    <None Include="Resources\Textures\WallTile.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

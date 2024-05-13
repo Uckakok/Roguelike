@@ -66,7 +66,16 @@ void GameEngine::PrepareMap()
         MessageBox(nullptr, L"Failed to load save, aborting.", L"Error", MB_OK | MB_ICONERROR);
         return;
     }
-    CurrentDungeon.LevelIndex = 1;
+    size_t digitPosition = LevelName.find_first_of("0123456789");
+    if (digitPosition != std::string::npos) {
+        std::string levelNumberString = LevelName.substr(digitPosition);
+        int levelNumber = std::stoi(levelNumberString);
+        CurrentDungeon.LevelIndex = levelNumber;
+    }
+    else {
+        MessageBox(nullptr, L"No level number found in the file name. Aborting", L"Error", MB_OK | MB_ICONERROR);
+        return;
+    }
     windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
     windowContext->NewPlayerCoords(CurrentDungeon.GetPlayerPosition());
 }
@@ -110,10 +119,8 @@ void GameEngine::LoadLevel(int LevelNumber)
     CurrentDungeon.SaveMapToSave();
 
     if (!CurrentDungeon.LoadMapFromSave(LevelName)) {
-        CurrentDungeon.SpawnPlayer(PreviousIndex >= LevelNumber, &PlayerCharacter);
-        SavePlayerState();
-        MessageBox(nullptr, L"Failed to load save, aborting.", L"Error", MB_OK | MB_ICONERROR);
-        return;
+        CurrentDungeon.GenerateMap();
+        //MessageBox(nullptr, L"Failed to load save, aborting.", L"Error", MB_OK | MB_ICONERROR);
     }
     CurrentDungeon.LevelIndex = LevelNumber;
     CurrentDungeon.SpawnPlayer(PreviousIndex < LevelNumber, &PlayerCharacter);
