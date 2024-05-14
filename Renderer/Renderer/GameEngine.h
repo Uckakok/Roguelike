@@ -15,12 +15,18 @@ typedef void(*HoverInfoCallback)(BSTR Name, int CurrentHP, int MaxHP);
 
 typedef void(*ShowUseCallback)(bool bShow);
 
+typedef void(*LoggerCallback)(BSTR LogEvent);
+
 // Function prototypes
 extern "C" __declspec(dllexport) void InitializeGame(WindowHwndCallback);
 
-extern "C" __declspec(dllexport) void GameTick(HoverInfoCallback NewHoverCallback, ShowUseCallback NewShowUseCallback);
+extern "C" __declspec(dllexport) void GameTick(HoverInfoCallback NewHoverCallback, ShowUseCallback NewShowUseCallback, LoggerCallback NewLoggerCallback);
 
 extern "C" __declspec(dllexport) void UseActivated();
+
+extern "C" __declspec(dllexport) BSTR GetTranslation(const char* Key);
+
+extern "C" __declspec(dllexport) void ChangeLanguage(const char* Language);
 
 
 class GameEngine {
@@ -35,6 +41,7 @@ private:
     HoverInfoCallback g_HoverCallback = nullptr;
     WindowHwndCallback g_WindowCallback = nullptr;
     ShowUseCallback g_ShowUseCallback = nullptr;
+    LoggerCallback g_LoggerCallback = nullptr;
     graphicalInterface* windowContext;
     DungeonLevel CurrentDungeon;
 
@@ -62,6 +69,7 @@ public:
     static GameEngine* GetInstance();
     void InitializeEngine(WindowHwndCallback WindowCallback);
     void PrepareMap();
-    void RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback NewShowUseCallback);
+    void RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback NewShowUseCallback, LoggerCallback NewLoggerCallback);
     void TurnOnShouldUse();
+    void AppendLogger(BSTR NewLog);
 };

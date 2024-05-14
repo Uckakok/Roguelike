@@ -131,10 +131,11 @@ void GameEngine::LoadLevel(int LevelNumber)
     CurrentDungeon.SaveMapToSave();
 }
 
-void GameEngine::RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback NewShowUseCallback)
+void GameEngine::RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback NewShowUseCallback, LoggerCallback NewLoggerCallback)
 {
     g_HoverCallback = NewHoverCallback;
     g_ShowUseCallback = NewShowUseCallback;
+    g_LoggerCallback = NewLoggerCallback;
     Position PlayerMove;
     windowContext->windowUpdate();
     HoverInfo Info = CurrentDungeon.ConstructHoverInfo(windowContext->GetCursorHoverPosition());
@@ -180,18 +181,35 @@ void GameEngine::TurnOnShouldUse()
     bShouldUse = true;
 }
 
+void GameEngine::AppendLogger(BSTR NewLog)
+{
+    if (g_LoggerCallback) {
+        g_LoggerCallback(NewLog);
+    }
+}
+
 // Function to initialize game and pass the callback function
 extern "C" __declspec(dllexport) void InitializeGame(WindowHwndCallback WindowCallback)
 {
     GameEngine::GetInstance()->InitializeEngine(WindowCallback);
 }
 
-extern "C" __declspec(dllexport) void GameTick(HoverInfoCallback NewHoverCallback, ShowUseCallback NewShowUseCallback)
+extern "C" __declspec(dllexport) void GameTick(HoverInfoCallback NewHoverCallback, ShowUseCallback NewShowUseCallback, LoggerCallback NewLoggerCallback)
 {
-    GameEngine::GetInstance()->RunTick(NewHoverCallback, NewShowUseCallback);
+    GameEngine::GetInstance()->RunTick(NewHoverCallback, NewShowUseCallback, NewLoggerCallback);
 }
 
 extern "C" __declspec(dllexport) void UseActivated()
 {
     GameEngine::GetInstance()->TurnOnShouldUse();
+}
+
+extern "C" __declspec(dllexport) BSTR GetTranslation(const char* Key)
+{
+    return LOCALIZED_TEXT(Key);
+}
+
+extern "C" __declspec(dllexport) void ChangeLanguage(const char* Language)
+{
+    LocalizationManager::GetInstance()->ChangeLanguage(Language);
 }

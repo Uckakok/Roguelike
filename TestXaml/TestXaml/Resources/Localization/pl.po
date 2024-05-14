@@ -25,3 +25,6 @@ msgstr "Schody w górę"
 
 msgid "wall"
 msgstr "Ściana"
+
+msgid "use_text"
+msgstr "Użyj"

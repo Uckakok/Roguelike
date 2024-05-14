@@ -25,3 +25,21 @@ msgstr "Stairs Up"
 
 msgid "wall"
 msgstr "Wall"
+
+msgid "use_text"
+msgstr "Use"
+
+msgid "climb_downwards"
+msgstr "You climb downwards..."
+
+msgid "climb_upwards"
+msgstr "You climb upwards..."
+
+msgid "deal_damage_to"
+msgstr "You deal %d damage to %s"
+
+msgid "kill_who"
+msgstr "You kill %s"
+
+msgid "dealt_damage_to_you"
+msgstr "%s dealt %d damage to you"

@@ -6,8 +6,9 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
-using System.Windows.Media.Imaging;
+using System.IO;
 using System.Windows.Threading;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace TestXaml
 {
@@ -15,6 +16,7 @@ namespace TestXaml
     {
         private readonly HoverCallback hoverCallbackDelegate;
         private readonly ShowUseCallback showUseCallbackDelegate;
+        private readonly LoggerCallback loggerCallbackDelegate;
 
         private IntPtr otherWindow;
         private IntPtr thisWindow;
@@ -42,6 +44,8 @@ namespace TestXaml
         // Define a delegate for the button state callback function
         public delegate void HoverCallback([MarshalAs(UnmanagedType.BStr)] string Name, int CurrentHP, int MaxHP);
 
+        public delegate void LoggerCallback([MarshalAs(UnmanagedType.BStr)] string Name);
+
         // Define a delegate for the window handle callback function
         public delegate void WindowHandleCallback(IntPtr windowHandle);
 
@@ -57,10 +61,52 @@ namespace TestXaml
         public MainWindow()
         {
             InitializeComponent();
-            
-            
+
+
             hoverCallbackDelegate = new HoverCallback(HoverCallbackFunction);
             showUseCallbackDelegate = new ShowUseCallback(ShowUseCallbackFunction);
+            loggerCallbackDelegate = new LoggerCallback(LoggerCallbackFunction);
+            LoadLanguagesFromLocalizationDirectory();
+        }
+
+        private void LoggerCallbackFunction(string NewLog)
+        {
+            Console.WriteLine(NewLog);  
+        }
+
+        private void LoadLanguagesFromLocalizationDirectory()
+        {
+            string localizationDirectory = "Resources/Localization";
+            if (Directory.Exists(localizationDirectory))
+            {
+                string[] poFiles = Directory.GetFiles(localizationDirectory, "*.po");
+                foreach (string poFile in poFiles)
+                {
+                    string language = Path.GetFileNameWithoutExtension(poFile);
+                    if (language == "en")
+                    {
+                        AddLanguage(language, true); // Set as default selection
+                    }
+                    else
+                    {
+                        AddLanguage(language);
+                    }
+                }
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Localization directory not found.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void AddLanguage(string language, bool isDefault = false)
+        {
+            LanguageComboBox.Items.Add(language);
+
+            if (isDefault)
+            {
+                LanguageComboBox.SelectedItem = language;
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -93,7 +139,7 @@ namespace TestXaml
                         bShouldUse = false;
                         UseActivated();
                     }
-                    GameTick(Marshal.GetFunctionPointerForDelegate(hoverCallbackDelegate), Marshal.GetFunctionPointerForDelegate(showUseCallbackDelegate));
+                    GameTick(Marshal.GetFunctionPointerForDelegate(hoverCallbackDelegate), Marshal.GetFunctionPointerForDelegate(showUseCallbackDelegate), Marshal.GetFunctionPointerForDelegate(loggerCallbackDelegate));
 
                     frameCount++;
                     var currentTime = DateTime.Now;
@@ -139,6 +185,31 @@ namespace TestXaml
             });
         }
 
+        private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                System.Windows.Controls.ComboBox comboBox = (System.Windows.Controls.ComboBox)sender;
+                string selectedLanguage = (string)comboBox.SelectedItem;
+                //change language in GameEngine
+                ChangeLanguage(selectedLanguage);
+                //load all translations
+                LoadTranslations();
+            });
+        }
+
+        private void LoadTranslations()
+        {
+            string translationKey = "use_text";
+            IntPtr translationPtr = GetTranslation(translationKey);
+
+            // Convert the IntPtr to a managed string directly
+            string translation = Marshal.PtrToStringBSTR(translationPtr);
+            Marshal.FreeBSTR(translationPtr);
+
+            UseText.Text = translation;
+        }
+
         private void UseButton_Click(object sender, RoutedEventArgs e)
         {
             Dispatcher.Invoke(() =>
@@ -177,7 +248,11 @@ namespace TestXaml
         private static extern void InitializeGame(IntPtr windowHandleCallback);
 
         [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void GameTick(IntPtr hoverCallback, IntPtr useCallback);
+        private static extern void GameTick(IntPtr hoverCallback, IntPtr useCallback, IntPtr loggerCallback);
+        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr GetTranslation(string Key);
+        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void ChangeLanguage(string Language);
 
         // Callback method to receive the window handle from native code
         private void WindowCallback(IntPtr windowHandle)

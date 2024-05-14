@@ -9,9 +9,11 @@ void DungeonLevel::UseCurrentObject()
 {
     Position PlayerPos = GetPlayerPosition();
     if (LevelMap[PlayerPos.x][PlayerPos.y].Arch == Architecture::StairsDownTile) {
+        GameEngine::GetInstance()->AppendLogger(LOCALIZED_TEXT("climb_downwards"));
         GameEngine::GetInstance()->LoadLevel(LevelIndex + 1);
     }
     if (LevelMap[PlayerPos.x][PlayerPos.y].Arch == Architecture::StairsUpTile) {
+        GameEngine::GetInstance()->AppendLogger(LOCALIZED_TEXT("climb_upwards"));
         GameEngine::GetInstance()->LoadLevel(LevelIndex - 1);
     }
     //todo: use other things
@@ -528,7 +530,9 @@ bool DungeonLevel::PerformAction(Position PlayerMove)
     if (EntityOnTile) {
         //perform attack
         EntityOnTile->ReceiveDamage(PlayerEntity->GetDamage());
+        GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("deal_damage_to").c_str(), PlayerEntity->GetDamage(), ToString(EntityOnTile->Type)));
         if (EntityOnTile->IsDead()) {
+            GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("kill_who").c_str(), ToString(EntityOnTile->Type)));
             KillEntityOnPosition(PlayerMove);
         }
         PutInQueue(5, PlayerEntity);
@@ -579,6 +583,7 @@ bool DungeonLevel::MoveEntity(Entity* EntityToMove)
     if (EntityOnTile) {
         //perform attack
         EntityOnTile->ReceiveDamage(EntityToMove->GetDamage());
+        GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("dealt_damage_to_you").c_str(), ToString(EntityToMove->Type), EntityToMove->GetDamage()));
         if (EntityOnTile->IsDead()) {
             if (EntityOnTile->IsPlayer()) {
                 KillEntityOnPosition(NextMove);
