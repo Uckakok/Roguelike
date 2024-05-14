@@ -40,7 +40,7 @@ namespace TestXaml
         private TimerCallback timerCallbackDelegate;
 
         // Define a delegate for the button state callback function
-        public delegate void HoverCallback(IntPtr Name, int CurrentHP, int MaxHP);
+        public delegate void HoverCallback([MarshalAs(UnmanagedType.BStr)] string Name, int CurrentHP, int MaxHP);
 
         // Define a delegate for the window handle callback function
         public delegate void WindowHandleCallback(IntPtr windowHandle);
@@ -147,7 +147,7 @@ namespace TestXaml
             });
         }
 
-        private void HoverCallbackFunction(IntPtr Name, int CurrentHP, int MaxHP)
+        private void HoverCallbackFunction(string Name, int CurrentHP, int MaxHP)
         {
             Dispatcher.Invoke(() =>
             {
@@ -157,11 +157,8 @@ namespace TestXaml
                 }
                 else
                 {
-                    // Marshal the pointer to a C# string
-                    string nameString = Marshal.PtrToStringAnsi(Name);
-
                     // Construct the new text
-                    string newText = nameString;
+                    string newText = Name;
                     if (CurrentHP != 0)
                     {
                         newText += "\nHP: " + CurrentHP + "/" + MaxHP;

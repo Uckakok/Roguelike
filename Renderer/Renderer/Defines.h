@@ -1,11 +1,13 @@
 #pragma once
 #include<string>
 #include"Texture.h"
+#include <comutil.h>
+#include "LocalizationManager.h"
+#include<fstream>
 
 #define LEVEL_SIZE	32
 #define TILE_MIDDLE	32
 #define EXTENSION	".XDD"
-
 
 enum ItemTypes {
 	Empty,
@@ -42,29 +44,29 @@ enum TileTypes {
 	Num
 };
 
-inline std::string ToString(Architecture arch) {
+inline BSTR ToString(Architecture arch) {
 	switch (arch) {
 	case Architecture::FloorTile:
-		return "floor";
+		return LOCALIZED_TEXT("floor");
 	case Architecture::WallTile:
-		return "wall";
+		return LOCALIZED_TEXT("wall");
 	case Architecture::StairsDownTile:
-		return "stairs down";
+		return LOCALIZED_TEXT("stairs_down");
 	case Architecture::StairsUpTile:
-		return "stairs up";
+		return LOCALIZED_TEXT("stairs_up");
 	default:
-		return "invalid";
+		return LOCALIZED_TEXT("invalid");
 	}
 }
 
-inline std::string ToString(EntityTypes ent) {
+inline BSTR ToString(EntityTypes ent) {
 	switch (ent) {
 	case EntityTypes::PlayerEntity:
-		return "Player";
+		return LOCALIZED_TEXT("player");
 	case EntityTypes::GoblinEntity:
-		return "Goblin";
+		return LOCALIZED_TEXT("goblin");
 	default:
-		return "invalid";
+		return LOCALIZED_TEXT("invalid");
 	}
 }
 
@@ -158,10 +160,14 @@ struct Position {
 	}
 };
 
+
+
 struct HoverInfo {
-	std::string Name;
+	BSTR Name;
 	int CurrentHP;
 	int MaxHP;
-	HoverInfo(std::string NewName, int NewCurrentHP, int NewMaxHP) : Name(NewName), CurrentHP(NewCurrentHP), MaxHP(NewMaxHP) { ; };
+
+	HoverInfo(BSTR NewName, int NewCurrentHP, int NewMaxHP) : CurrentHP(NewCurrentHP), MaxHP(NewMaxHP), Name(NewName) { ; };
 };
+
 

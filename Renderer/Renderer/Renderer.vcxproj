@@ -103,7 +103,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);Opengl32.lib;gdi32.lib;glu32.lib;glfw3.lib;glew32s.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);Opengl32.lib;gdi32.lib;glu32.lib;glfw3.lib;glew32s.lib;comsuppw.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -126,7 +126,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);Opengl32.lib;gdi32.lib;glu32.lib;glfw3.lib;glew32s.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);Opengl32.lib;gdi32.lib;glu32.lib;glfw3.lib;glew32s.lib;comsuppw.lib</AdditionalDependencies>
       <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
     </Link>
   </ItemDefinitionGroup>
@@ -457,6 +457,7 @@
     <ClInclude Include="GraphicHandler.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Level.h" />
+    <ClInclude Include="LocalizationManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
@@ -474,6 +475,7 @@
     <ClCompile Include="GraphicHandler.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Level.cpp" />
+    <ClCompile Include="LocalizationManager.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

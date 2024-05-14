@@ -11,7 +11,7 @@
 typedef void(*WindowHwndCallback)(HWND);
 
 //hover info callback
-typedef void(*HoverInfoCallback)(const char* Name, int CurrentHP, int MaxHP);
+typedef void(*HoverInfoCallback)(BSTR Name, int CurrentHP, int MaxHP);
 
 typedef void(*ShowUseCallback)(bool bShow);
 
@@ -25,6 +25,7 @@ extern "C" __declspec(dllexport) void UseActivated();
 
 class GameEngine {
 private:
+    
 
     GameEngine() = default;
 

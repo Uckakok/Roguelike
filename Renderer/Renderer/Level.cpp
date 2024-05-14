@@ -2,6 +2,7 @@
 #include "Level.h"
 #include <queue>
 #include <cmath>
+#include "LocalizationManager.h"
 #include "GameEngine.h"
 
 void DungeonLevel::UseCurrentObject()
@@ -766,7 +767,7 @@ HoverInfo DungeonLevel::ConstructHoverInfo(Position HoverPosition)
 {
     if (HoverPosition.x < 0 || HoverPosition.x >= static_cast<int>(LevelMap.size()) ||
         HoverPosition.y < 0 || HoverPosition.y >= static_cast<int>(LevelMap[0].size())) {
-        return HoverInfo("Out of Bounds", 0, 0);
+        return HoverInfo(LOCALIZED_TEXT("out_of_bounds"), 0, 0);
     }
 
     if (LevelMap[HoverPosition.x][HoverPosition.y].Entity == nullptr) {
@@ -776,7 +777,7 @@ HoverInfo DungeonLevel::ConstructHoverInfo(Position HoverPosition)
         return HoverInfo(ToString(LevelMap[HoverPosition.x][HoverPosition.y].Entity->Type), LevelMap[HoverPosition.x][HoverPosition.y].Entity->GetHP(), 100);
     }
 
-    return HoverInfo("Error", 0, 0);
+    return HoverInfo(LOCALIZED_TEXT("error"), 0, 0);
 }
 
 

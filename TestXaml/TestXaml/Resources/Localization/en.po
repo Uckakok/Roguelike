@@ -1,0 +1,27 @@
+msgid ""
+msgstr ""
+"Language: English\n"
+
+msgid "error"
+msgstr "Error"
+
+msgid "floor"
+msgstr "Floor"
+
+msgid "out_of_bounds"
+msgstr "Out of Bounds"
+
+msgid "stairs_down"
+msgstr "Stairs Down"
+
+msgid "player"
+msgstr "Player"
+
+msgid "goblin"
+msgstr "Goblin"
+
+msgid "stairs_up"
+msgstr "Stairs Up"
+
+msgid "wall"
+msgstr "Wall"

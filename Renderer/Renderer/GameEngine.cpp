@@ -11,6 +11,7 @@
 #include "glfw3.h"
 #include "glfw3native.h"
 #include <gl/GLU.h>
+#include "LocalizationManager.h"
 #include <fstream>
 
 
@@ -49,6 +50,7 @@ void GameEngine::PrepareMap()
     windowContext->unbindStuff();
     windowContext->setupCallbacks();
     windowContext->setupMatrices();
+    LocalizationManager::GetInstance()->LoadAllLocalizedStrings();
 
     std::string LevelName;
 
@@ -138,7 +140,7 @@ void GameEngine::RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback New
     HoverInfo Info = CurrentDungeon.ConstructHoverInfo(windowContext->GetCursorHoverPosition());
 
     if (g_HoverCallback) {
-        g_HoverCallback(Info.Name.c_str(), Info.CurrentHP, Info.MaxHP);
+        g_HoverCallback(Info.Name, Info.CurrentHP, Info.MaxHP);
     }
 
     //try to consume use

@@ -1,0 +1,27 @@
+msgid ""
+msgstr ""
+"Language: Polish\n"
+
+msgid "error"
+msgstr "Błąd"
+
+msgid "floor"
+msgstr "Podłoga"
+
+msgid "out_of_bounds"
+msgstr "Poza granicami"
+
+msgid "stairs_down"
+msgstr "Schody w dół"
+
+msgid "player"
+msgstr "Gracz"
+
+msgid "goblin"
+msgstr "Goblin"
+
+msgid "stairs_up"
+msgstr "Schody w górę"
+
+msgid "wall"
+msgstr "Ściana"
