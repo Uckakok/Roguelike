@@ -69,7 +69,7 @@ private:
 	void ConnectAreas(std::vector<std::vector<Position>>& Areas);
 	std::vector<Position> FindAllConnected(Position StartPos, std::vector<std::vector<LevelTile>>* NewMap);
 	bool bIsGameEnded = false;
-	void KillEntityOnPosition(Position Location);
+	void KillEntityOnPosition(Position Location, bool bUpdateQueue = true);
 	bool IsMoveLegal(Position PlayerMove);
 	std::vector<std::vector<LevelTile>> LevelMap;
 	std::vector<std::vector<Entity*>> MonsterQueue;
@@ -78,8 +78,4 @@ private:
 
 	std::vector<Item> ItemsOnLevel;
 	std::vector<Entity*> EntitiesOnLevel;
-
-
-
-
 };

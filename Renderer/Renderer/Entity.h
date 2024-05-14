@@ -11,7 +11,7 @@ private:
 	bool bIsPlayer = false;
 public:
 	Entity() = default;
-	Entity(const Entity& NewEntity) : HP(NewEntity.HP), Damage(NewEntity.Damage), bIsDead(NewEntity.bIsDead), bIsPlayer(NewEntity.bIsPlayer) { ; };
+	Entity(const Entity& NewEntity) : HP(NewEntity.HP), Damage(NewEntity.Damage), bIsDead(NewEntity.bIsDead), bIsPlayer(NewEntity.bIsPlayer), Location(NewEntity.Location), Type(NewEntity.Type) { ; };
 	Position Location;
 	EntityTypes Type;
 	//stats but who cares

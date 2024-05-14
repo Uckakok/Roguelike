@@ -24,14 +24,16 @@ void DungeonLevel::SpawnPlayer(bool bFromUp, Entity* Player)
         return;
     }
 
+    Entity* NewPlayer = new Entity(*Player);
+
     if (bFromUp) {
         for (int i = 0; i < DeclaredBoardSize; ++i) {
             for (int j = 0; j < DeclaredBoardSize; ++j) {
                 if (LevelMap[i][j].Arch == Architecture::StairsUpTile) {
-                    EntitiesOnLevel.push_back(new Entity(*Player));
-                    GetPlayer()->Location = Position(i, j);
-                    LevelMap[i][j].Entity = GetPlayer();
-                    MonsterQueue[0].insert(MonsterQueue[0].begin(), GetPlayer());
+                    NewPlayer->Location = Position(i, j); 
+                    EntitiesOnLevel.push_back(NewPlayer); 
+                    LevelMap[i][j].Entity = NewPlayer; 
+                    MonsterQueue[0].insert(MonsterQueue[0].begin(), NewPlayer);
                     return;
                 }
             }
@@ -41,20 +43,22 @@ void DungeonLevel::SpawnPlayer(bool bFromUp, Entity* Player)
         for (int i = 0; i < DeclaredBoardSize; ++i) {
             for (int j = 0; j < DeclaredBoardSize; ++j) {
                 if (LevelMap[i][j].Arch == Architecture::StairsDownTile) {
-                    EntitiesOnLevel.push_back(new Entity(*Player));
-                    GetPlayer()->Location = Position(i, j);
-                    LevelMap[i][j].Entity = GetPlayer();
-                    MonsterQueue[0].insert(MonsterQueue[0].begin(), GetPlayer());
+                    NewPlayer->Location = Position(i, j);
+                    EntitiesOnLevel.push_back(NewPlayer);
+                    LevelMap[i][j].Entity = NewPlayer;
+                    MonsterQueue[0].insert(MonsterQueue[0].begin(), NewPlayer);
                     return;
                 }
             }
         }
     }
+    delete NewPlayer;
     MessageBox(nullptr, L"didn't find a valid localization to spawn a player!", L"Error", MB_OK | MB_ICONERROR);
 }
 
 bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
 {
+    
     std::ifstream file(SaveName);
     if (!file.is_open()) {
         //std::string errorMessage = "Failed to load dungeon save: " + SaveName;
@@ -68,6 +72,7 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
         delete ent;
     }
 
+    MonsterQueue.clear();
     EntitiesOnLevel.clear();
     ItemsOnLevel.clear();
 
@@ -140,7 +145,9 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
         if (ent->IsPlayer()) continue;
         AllEnts.push_back(ent);
     }
-    AllEnts.insert(AllEnts.begin(), GetPlayer());
+    if (GetPlayer()) {
+        AllEnts.insert(AllEnts.begin(), GetPlayer());
+    }
 
     //std::stringstream ss;
     //ss << "AllEnts Contents:\n";
@@ -155,15 +162,27 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
 
     //// Display the message box
     //MessageBox(NULL, std::wstring(message.begin(), message.end()).c_str(), L"AllEnts Contents", MB_OK);
-
     MonsterQueue.push_back(AllEnts);
+    for (const auto& queue : MonsterQueue) {
+        for (const auto& entityPtr : queue) {
+            if (entityPtr == nullptr) {
+                MessageBox(nullptr, L"Null reference found in MonsterQueue!", L"Error", MB_OK | MB_ICONERROR);
+                break;
+            }
+        }
+    }
 
     LevelMap = std::move(newLevelMap);
+
     return true;
 }
 
 void DungeonLevel::PutInQueue(int PositionOffset, Entity* ent)
 {
+    if (!ent) {
+        MessageBox(nullptr, L"Entity is null", L"Error", MB_OK | MB_ICONERROR);
+        return;
+    }
     while (MonsterQueue.size() <= PositionOffset) {
         std::vector<Entity*> NewTurn;
         MonsterQueue.push_back(NewTurn);
@@ -279,6 +298,7 @@ void DungeonLevel::GenerateMap()
     for (auto* ent : EntitiesOnLevel) {
         delete ent;
     }
+    MonsterQueue.clear();
     EntitiesOnLevel.clear();
     ItemsOnLevel.clear();
 
@@ -355,8 +375,7 @@ std::vector<Position> DungeonLevel::FindAllConnected(Position StartPos, std::vec
 void DungeonLevel::RemovePlayer()
 {
     Entity* Player = GetPlayer();
-    LevelMap[Player->Location.x][Player->Location.y].Entity = nullptr;
-    KillEntityOnPosition(Player->Location);
+    KillEntityOnPosition(Player->Location, false);
 }
 
 bool DungeonLevel::SaveMapToSave()
@@ -481,6 +500,7 @@ Position DungeonLevel::GetPlayerPosition()
     else {
         MessageBox(nullptr, L"Player was not found.", L"Error", MB_OK | MB_ICONERROR);
     }
+    return Position(-1, -1);
 }
 
 bool DungeonLevel::PerformAction(Position PlayerMove)
@@ -490,6 +510,19 @@ bool DungeonLevel::PerformAction(Position PlayerMove)
     }
 
     Entity* PlayerEntity = GetPlayer();
+
+    if (PlayerEntity->Location == PlayerMove) {
+        //player waited
+        PutInQueue(1, PlayerEntity);
+        for (auto it = MonsterQueue.front().begin(); it != MonsterQueue.front().end(); ++it) {
+            if (*it == GetPlayer()) {
+                MonsterQueue.front().erase(it);
+                break;
+            }
+        }
+        return true;
+    }
+
     Entity* EntityOnTile = GetEntityOnTile(PlayerMove);
     if (EntityOnTile) {
         //perform attack
@@ -747,7 +780,7 @@ HoverInfo DungeonLevel::ConstructHoverInfo(Position HoverPosition)
 }
 
 
-void DungeonLevel::KillEntityOnPosition(Position Location)
+void DungeonLevel::KillEntityOnPosition(Position Location, bool bUpdateQueue)
 {
     // Set the entity pointer in the LevelMap to nullptr
     LevelMap[Location.x][Location.y].Entity = nullptr;
@@ -761,6 +794,9 @@ void DungeonLevel::KillEntityOnPosition(Position Location)
     }
 
     //remove this entity from queue
+    if (!bUpdateQueue) {
+        return;
+    }
     for (auto& queue : MonsterQueue) {
         for (auto it = queue.begin(); it != queue.end();) {
             if ((*it)->Location == Location) {
@@ -777,10 +813,6 @@ void DungeonLevel::KillEntityOnPosition(Position Location)
 bool DungeonLevel::IsMoveLegal(Position PlayerMove)
 {
     //ignore ranged attacks for now. handle later
-
-    if (PlayerMove == GetPlayer()->Location) {
-        return false;
-    }
 
     if (PlayerMove.x < 0 || PlayerMove.x >= DeclaredBoardSize || PlayerMove.y < 0 || PlayerMove.y >= DeclaredBoardSize) {
         return false; // Out of bounds
