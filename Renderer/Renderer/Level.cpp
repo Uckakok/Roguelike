@@ -4,6 +4,7 @@
 #include <cmath>
 #include "LocalizationManager.h"
 #include "GameEngine.h"
+#include "MonsterLibrary.h"
 
 void DungeonLevel::UseCurrentObject()
 {
@@ -12,7 +13,7 @@ void DungeonLevel::UseCurrentObject()
         GameEngine::GetInstance()->AppendLogger(LOCALIZED_TEXT("climb_downwards"));
         GameEngine::GetInstance()->LoadLevel(LevelIndex + 1);
     }
-    if (LevelMap[PlayerPos.x][PlayerPos.y].Arch == Architecture::StairsUpTile) {
+    if (LevelMap[PlayerPos.x][PlayerPos.y].Arch == Architecture::StairsUpTile && LevelIndex != 1) {
         GameEngine::GetInstance()->AppendLogger(LOCALIZED_TEXT("climb_upwards"));
         GameEngine::GetInstance()->LoadLevel(LevelIndex - 1);
     }
@@ -113,17 +114,17 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
 
     DeclaredBoardSize = BoardSize;
 
-    int entityID, x, y, HP, Damage;
+    int entityID, x, y, HP, MaxHP, Damage;
     while (std::getline(file, line)) {
         if (line.empty()) {
             break;
         }
 
         std::istringstream iss(line);
-        iss >> entityID >> x >> y >> HP >> Damage;
+        iss >> entityID >> x >> y >> HP >> MaxHP >> Damage;
 
         if (entityID != 0) {
-            EntitiesOnLevel.push_back(new Entity(static_cast<EntityTypes>(entityID), Position(x, y), HP, Damage));
+            EntitiesOnLevel.push_back(new Entity(static_cast<EntityTypes>(entityID), Position(x, y), HP, MaxHP, Damage));
         }
     }
 
@@ -305,12 +306,23 @@ void DungeonLevel::GenerateMap()
     EntitiesOnLevel.clear();
     ItemsOnLevel.clear();
 
-    int GoblinCount = rand() % 10 + 5;
+    int EntityCount = rand() % 10 + 5;
 
-    for (int i = 0; i < GoblinCount; ++i) {
+    for (int i = 0; i < EntityCount; ++i) {
         Index = rand() % ValidTilesForSpawning.size();
         if (ValidTilesForSpawning[Index]->Arch == Architecture::StairsUpTile || ValidTilesForSpawning[Index]->Entity) continue;
-        EntitiesOnLevel.push_back(new Entity(EntityTypes::GoblinEntity, ValidTilesForSpawning[Index]->Coordinates, 100, 10));
+        //todo: add types of enemies and spawn them from their blueprints
+        //get random entity
+        MonsterData NewMonster;
+        NewMonster.Weight = 0;
+
+        while (NewMonster.Weight == 0 || NewMonster.Weight > (LevelIndex * MONSTER_SPAWN_RANDOMIZER) + (rand() % MONSTER_SPAWN_RANDOMIZER)) {
+            NewMonster = MonsterManager::GetInstance()->GetRandMonsterData();
+        }
+        Entity* NewEntity = new Entity(ToEntity(NewMonster));
+
+        NewEntity->Location = ValidTilesForSpawning[Index]->Coordinates;
+        EntitiesOnLevel.push_back(NewEntity);
         ValidTilesForSpawning[Index]->Entity = EntitiesOnLevel.back();
     }
 
@@ -407,7 +419,7 @@ bool DungeonLevel::SaveMapToSave()
 
     // Save the entities
     for (auto& ent : EntitiesOnLevel) {
-        file << static_cast<int>(ent->Type) << ' ' << ent->Location.x << ' ' << ent->Location.y << ' ' << ent->GetHP() << ' ' << ent->GetDamage() << std::endl;
+        file << static_cast<int>(ent->Type) << ' ' << ent->Location.x << ' ' << ent->Location.y << ' ' << ent->GetHP() << ' ' << ent->GetMaxHP() << ' ' << ent->GetDamage() << std::endl;
     }
 
     file << std::endl;
@@ -530,9 +542,9 @@ bool DungeonLevel::PerformAction(Position PlayerMove)
     if (EntityOnTile) {
         //perform attack
         EntityOnTile->ReceiveDamage(PlayerEntity->GetDamage());
-        GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("deal_damage_to").c_str(), PlayerEntity->GetDamage(), ToString(EntityOnTile->Type)));
+        GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("deal_damage_to").c_str(), PlayerEntity->GetDamage(), LOCALIZED_TEXT(GETMONSTERKEY(EntityOnTile->Type))));
         if (EntityOnTile->IsDead()) {
-            GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("kill_who").c_str(), ToString(EntityOnTile->Type)));
+            GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("kill_who").c_str(), LOCALIZED_TEXT(GETMONSTERKEY(EntityOnTile->Type))));
             KillEntityOnPosition(PlayerMove);
         }
         PutInQueue(5, PlayerEntity);
@@ -583,12 +595,13 @@ bool DungeonLevel::MoveEntity(Entity* EntityToMove)
     if (EntityOnTile) {
         //perform attack
         EntityOnTile->ReceiveDamage(EntityToMove->GetDamage());
-        GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("dealt_damage_to_you").c_str(), ToString(EntityToMove->Type), EntityToMove->GetDamage()));
+        GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("dealt_damage_to_you").c_str(), LOCALIZED_TEXT(GETMONSTERKEY(EntityToMove->Type)), EntityToMove->GetDamage()));
         if (EntityOnTile->IsDead()) {
             if (EntityOnTile->IsPlayer()) {
                 KillEntityOnPosition(NextMove);
                 MessageBox(nullptr, L"You Died!", L"Game over", MB_OK | MB_ICONEXCLAMATION);
                 bIsGameEnded = true;
+                return true;
             }
         }
 
@@ -747,6 +760,7 @@ void DungeonLevel::PerformEntitiesTurn()
 
             MoveEntity(ent);
         }
+        if (bIsGameEnded) break;
         MonsterQueue.erase(MonsterQueue.begin());
     }
 }
@@ -759,7 +773,7 @@ bool DungeonLevel::GetGameEnded()
 bool DungeonLevel::IsUseAvailable()
 {
     Position PlayerPos = GetPlayerPosition();
-    if (LevelMap[PlayerPos.x][PlayerPos.y].Arch == Architecture::StairsDownTile || LevelMap[PlayerPos.x][PlayerPos.y].Arch == Architecture::StairsUpTile) {
+    if (LevelMap[PlayerPos.x][PlayerPos.y].Arch == Architecture::StairsDownTile || (LevelMap[PlayerPos.x][PlayerPos.y].Arch == Architecture::StairsUpTile && LevelIndex != 1)) {
         return true;
     }
     if (!LevelMap[PlayerPos.x][PlayerPos.y].Items.empty()) {
@@ -779,7 +793,7 @@ HoverInfo DungeonLevel::ConstructHoverInfo(Position HoverPosition)
         return HoverInfo(ToString(LevelMap[HoverPosition.x][HoverPosition.y].Arch), 0, 1);
     }
     else {
-        return HoverInfo(ToString(LevelMap[HoverPosition.x][HoverPosition.y].Entity->Type), LevelMap[HoverPosition.x][HoverPosition.y].Entity->GetHP(), 100);
+        return HoverInfo(LOCALIZED_TEXT(GETMONSTERKEY(LevelMap[HoverPosition.x][HoverPosition.y].Entity->Type)), LevelMap[HoverPosition.x][HoverPosition.y].Entity->GetHP(), LevelMap[HoverPosition.x][HoverPosition.y].Entity->GetMaxHP());
     }
 
     return HoverInfo(LOCALIZED_TEXT("error"), 0, 0);

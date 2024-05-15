@@ -8,6 +8,8 @@
 #define LEVEL_SIZE	32
 #define TILE_MIDDLE	32
 #define EXTENSION	".XDD"
+#define MAX_LEVEL	50
+#define MONSTER_SPAWN_RANDOMIZER	6
 
 enum ItemTypes {
 	Empty,
@@ -28,6 +30,16 @@ enum EntityTypes {
 	None,
 	PlayerEntity,
 	GoblinEntity,
+	OrcEntity,
+	DrakeEntity,
+	GriffinEntity,
+	AngelEntity,
+	DwarfEntity,
+	DendroidEntity,
+	GoldenDragonEntity,
+	ImpEntity,
+	SkeletonEntity,
+	GnollEntity,
 };
 
 enum TileTypes {
@@ -37,6 +49,16 @@ enum TileTypes {
 	Bow,
 	Player,
 	Goblin,
+	Orc,
+	Drake,
+	Griffin,
+	Angel,
+	Dwarf,
+	Dendroid,
+	GoldenDragon,
+	Imp,
+	Skeleton,
+	Gnoll,
 	Highlight,
 	StairsDown,
 	StairsUp,
@@ -59,25 +81,34 @@ inline BSTR ToString(Architecture arch) {
 	}
 }
 
-inline BSTR ToString(EntityTypes ent) {
-	switch (ent) {
-	case EntityTypes::PlayerEntity:
-		return LOCALIZED_TEXT("player");
-	case EntityTypes::GoblinEntity:
-		return LOCALIZED_TEXT("goblin");
-	default:
-		return LOCALIZED_TEXT("invalid");
-	}
-}
-
 inline TileTypes ToTiletype(EntityTypes ent) {
 	switch (ent) {
 	case EntityTypes::PlayerEntity:
 		return TileTypes::Player;
 	case EntityTypes::GoblinEntity:
 		return TileTypes::Goblin;
+	case EntityTypes::OrcEntity:
+		return TileTypes::Orc;
+	case EntityTypes::DrakeEntity:
+		return TileTypes::Drake;
+	case EntityTypes::GriffinEntity:
+		return TileTypes::Griffin;
+	case EntityTypes::AngelEntity:
+		return TileTypes::Angel;
+	case EntityTypes::DwarfEntity:
+		return TileTypes::Dwarf;
+	case EntityTypes::DendroidEntity:
+		return TileTypes::Dendroid;
+	case EntityTypes::GoldenDragonEntity:
+		return TileTypes::GoldenDragon;
+	case EntityTypes::ImpEntity:
+		return TileTypes::Imp;
+	case EntityTypes::SkeletonEntity:
+		return TileTypes::Skeleton;
+	case EntityTypes::GnollEntity:
+		return TileTypes::Gnoll;
 	default:
-		MessageBox(nullptr, L"trying to convert invalid entity to tile type!", L"Error", MB_OK | MB_ICONERROR);
+		MessageBox(nullptr, L"Trying to convert invalid entity to tile type!", L"Error", MB_OK | MB_ICONERROR);
 		return TileTypes::Floor;
 	}
 }
@@ -124,6 +155,26 @@ struct Sprite {
 			return "Resources/Textures/ItemSword.png";
 		case TileTypes::Goblin:
 			return "Resources/Textures/GoblinSprite.png";
+		case TileTypes::Orc:
+			return "Resources/Textures/OrcSprite.png";
+		case TileTypes::Drake:
+			return "Resources/Textures/DrakeSprite.png";
+		case TileTypes::Griffin:
+			return "Resources/Textures/GriffinSprite.png";
+		case TileTypes::Angel:
+			return "Resources/Textures/AngelSprite.png";
+		case TileTypes::Dwarf:
+			return "Resources/Textures/DwarfSprite.png";
+		case TileTypes::Dendroid:
+			return "Resources/Textures/DendroidSprite.png";
+		case TileTypes::GoldenDragon:
+			return "Resources/Textures/GoldenDragonSprite.png";
+		case TileTypes::Imp:
+			return "Resources/Textures/ImpSprite.png";
+		case TileTypes::Skeleton:
+			return "Resources/Textures/SkeletonSprite.png";
+		case TileTypes::Gnoll:
+			return "Resources/Textures/GnollSprite.png";
 		case TileTypes::Highlight:
 			return "Resources/Textures/Highlight.png";
 		case TileTypes::StairsDown:

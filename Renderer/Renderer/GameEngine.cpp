@@ -9,8 +9,10 @@
 #include "glew.h"
 #include <gl/GL.h>
 #include "glfw3.h"
+#include<filesystem>
 #include "glfw3native.h"
 #include <gl/GLU.h>
+#include "MonsterLibrary.h"
 #include "LocalizationManager.h"
 #include <fstream>
 
@@ -51,14 +53,29 @@ void GameEngine::PrepareMap()
     windowContext->setupCallbacks();
     windowContext->setupMatrices();
     LocalizationManager::GetInstance()->LoadAllLocalizedStrings();
+    MonsterManager::GetInstance()->ReadMonsterDataFromFile();
 
     std::string LevelName;
 
-    std::ifstream file("test.XDD");
+    std::string SaveSlot = PlayerName; //todo: add support for multiple saved characters
+    SaveSlot.append(EXTENSION);
+
+    std::ifstream file(SaveSlot); 
     if (!file.is_open()) {
-        LevelName = PlayerName;
-        LevelName.append("1"); //level number
-        LevelName.append(EXTENSION);
+        //player died. Generate new player save
+        std::ofstream NewFile(SaveSlot);
+        if (!NewFile.is_open()) {
+            MessageBox(nullptr, L"Can't create a new save slot! Critical error", L"Error", MB_OK | MB_ICONERROR);
+            return;
+        }
+        NewFile << PlayerName << '1' << EXTENSION; //create first level
+        CurrentDungeon.LevelIndex = 1;
+        CurrentDungeon.GenerateMap();
+        PlayerCharacter = Entity(MonsterManager::GetInstance()->GetMonster(EntityTypes::PlayerEntity));
+        CurrentDungeon.SpawnPlayer(true, &PlayerCharacter);
+        windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
+        windowContext->NewPlayerCoords(CurrentDungeon.GetPlayerPosition());
+        return;
     }
     else {
         file >> LevelName;
@@ -118,11 +135,11 @@ void GameEngine::LoadLevel(int LevelNumber)
 
     CurrentDungeon.SaveMapToSave();
 
+    CurrentDungeon.LevelIndex = LevelNumber;
     if (!CurrentDungeon.LoadMapFromSave(LevelName)) {
         CurrentDungeon.GenerateMap();
         //MessageBox(nullptr, L"Failed to load save, aborting.", L"Error", MB_OK | MB_ICONERROR);
     }
-    CurrentDungeon.LevelIndex = LevelNumber;
     CurrentDungeon.SpawnPlayer(PreviousIndex < LevelNumber, &PlayerCharacter);
     windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
     windowContext->NewPlayerCoords(CurrentDungeon.GetPlayerPosition());
@@ -133,6 +150,7 @@ void GameEngine::LoadLevel(int LevelNumber)
 
 void GameEngine::RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback NewShowUseCallback, LoggerCallback NewLoggerCallback)
 {
+    
     g_HoverCallback = NewHoverCallback;
     g_ShowUseCallback = NewShowUseCallback;
     g_LoggerCallback = NewLoggerCallback;
@@ -142,6 +160,10 @@ void GameEngine::RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback New
 
     if (g_HoverCallback) {
         g_HoverCallback(Info.Name, Info.CurrentHP, Info.MaxHP);
+    }
+
+    if (CurrentDungeon.GetGameEnded()) {
+        return;
     }
 
     //try to consume use
@@ -171,7 +193,20 @@ void GameEngine::RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback New
         }
         else {
             windowContext->windowUpdate();
-            return;
+            //delete all player saves
+            
+            for (const auto& entry : std::filesystem::directory_iterator(".")) {
+                if (entry.is_regular_file()) {
+                    std::string filename = entry.path().filename().string();
+                    if (filename.find(PlayerName) == 0 && filename.find(EXTENSION) == filename.size() - std::string(EXTENSION).size()) {
+                        std::error_code ec;
+                        std::filesystem::remove(entry, ec);
+                        if (ec) {
+                            MessageBox(nullptr, L"Couldn't delete one of the player files", L"Error", MB_OK | MB_ICONERROR);
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -28,3 +28,8 @@ int Entity::GetHP()
 {
     return HP;
 }
+
+int Entity::GetMaxHP()
+{
+    return MaxHP;
+}

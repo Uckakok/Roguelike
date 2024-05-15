@@ -71,7 +71,8 @@ namespace TestXaml
 
         private void LoggerCallbackFunction(string NewLog)
         {
-            Console.WriteLine(NewLog);  
+            Console.WriteLine(NewLog); 
+            AddLogEvent(NewLog);
         }
 
         private void LoadLanguagesFromLocalizationDirectory()
@@ -154,6 +155,13 @@ namespace TestXaml
                 });
                 isGameTickRunning = false;
             }
+        }
+
+        private void AddLogEvent(string logEvent)
+        {
+            LogTextBox.AppendText(Environment.NewLine + logEvent);
+            LogTextBox.ScrollToEnd();
+            LogScroller.ScrollToBottom();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

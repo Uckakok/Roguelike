@@ -14,10 +14,10 @@ msgstr "Out of Bounds"
 msgid "stairs_down"
 msgstr "Stairs Down"
 
-msgid "player"
+msgid "player_entity"
 msgstr "Player"
 
-msgid "goblin"
+msgid "goblin_entity"
 msgstr "Goblin"
 
 msgid "stairs_up"
@@ -43,3 +43,33 @@ msgstr "You kill %s"
 
 msgid "dealt_damage_to_you"
 msgstr "%s dealt %d damage to you"
+
+msgid "orc_entity"
+msgstr "Orc"
+
+msgid "drake_entity"
+msgstr "Drake"
+
+msgid "griffin_entity"
+msgstr "Griffin"
+
+msgid "angel_entity"
+msgstr "Angel"
+
+msgid "dwarf_entity"
+msgstr "Dwarf"
+
+msgid "dendroid_entity"
+msgstr "Dendroid"
+
+msgid "golden_dragon_entity"
+msgstr "Golden Dragon"
+
+msgid "imp_entity"
+msgstr "Imp"
+
+msgid "skeleton_entity"
+msgstr "Skeleton"
+
+msgid "gnoll_entity"
+msgstr "Gnoll"

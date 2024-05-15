@@ -26,6 +26,9 @@
             </Button>
             <TextBlock x:Name="FpsText" Text="FPS: " HorizontalAlignment="Right" Width="60" FontSize="14" Margin="10, 10, 10, 10"/>
             <ComboBox x:Name="LanguageComboBox" Margin="10, 0, 0, 10" SelectionChanged="LanguageComboBox_SelectionChanged" Width="80" Height="45"/>
+            <ScrollViewer x:Name="LogScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="45" Width="200" Margin="10, 10, 10, 10">
+                <TextBox x:Name="LogTextBox" TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Auto"/>
+            </ScrollViewer>
         </StackPanel>
     </Grid>
 </Window>
