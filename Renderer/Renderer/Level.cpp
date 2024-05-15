@@ -9,15 +9,20 @@
 void DungeonLevel::UseCurrentObject()
 {
     Position PlayerPos = GetPlayerPosition();
+    if (LevelMap[PlayerPos.x][PlayerPos.y].CurrentItem) {
+        UseItem(LevelMap[PlayerPos.x][PlayerPos.y].CurrentItem);
+        return;
+    }
     if (LevelMap[PlayerPos.x][PlayerPos.y].Arch == Architecture::StairsDownTile) {
         GameEngine::GetInstance()->AppendLogger(LOCALIZED_TEXT("climb_downwards"));
         GameEngine::GetInstance()->LoadLevel(LevelIndex + 1);
+        return;
     }
     if (LevelMap[PlayerPos.x][PlayerPos.y].Arch == Architecture::StairsUpTile && LevelIndex != 1) {
         GameEngine::GetInstance()->AppendLogger(LOCALIZED_TEXT("climb_upwards"));
         GameEngine::GetInstance()->LoadLevel(LevelIndex - 1);
+        return;
     }
-    //todo: use other things
 }
 
 void DungeonLevel::SpawnPlayer(bool bFromUp, Entity* Player)
@@ -75,6 +80,9 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
     for (auto* ent : EntitiesOnLevel) {
         delete ent;
     }
+    for (auto* ent : ItemsOnLevel) {
+        delete ent;
+    }
 
     MonsterQueue.clear();
     EntitiesOnLevel.clear();
@@ -128,10 +136,10 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
         }
     }
 
-    int itemID, BonusHP, BonusDamage;
-    while (file >> itemID >> x >> y >> BonusHP >> BonusDamage) {
+    int itemID, BonusHP, BonusDamage, BonusPermaHP;
+    while (file >> itemID >> x >> y >> BonusHP >> BonusDamage >> BonusPermaHP) {
         if (itemID != 0) {
-            ItemsOnLevel.push_back(Item(static_cast<ItemTypes>(itemID), Position(x, y), BonusHP, BonusDamage));
+            ItemsOnLevel.push_back(new Item(static_cast<ItemTypes>(itemID), Position(x, y), BonusHP, BonusDamage, BonusPermaHP));
         }
     }
 
@@ -140,7 +148,7 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
     }
 
     for (auto& it : ItemsOnLevel) {
-        newLevelMap[it.Location.x][it.Location.y].Items.push_back(&it);
+        newLevelMap[it->Location.x][it->Location.y].CurrentItem = it;
     }
 
     std::vector<Entity*> AllEnts;
@@ -179,6 +187,40 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
     LevelMap = std::move(newLevelMap);
 
     return true;
+}
+
+void DungeonLevel::UseItem(Item* UsedItem)
+{
+    //apply buffs
+
+    GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("used_item"), ToString(UsedItem->Type)));
+    Entity* Player = GetPlayer();
+    if (UsedItem->BonusPermaHP != 0) {
+        Player->AddMaxHP(UsedItem->BonusPermaHP);
+        GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("gained_max_hp"), UsedItem->BonusPermaHP));
+    }
+    if (UsedItem->BonusHP != 0) {
+        Player->Heal(UsedItem->BonusHP);
+        GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("healed"), UsedItem->BonusHP));
+    }
+    if (UsedItem->BonusDamage != 0) {
+        Player->AddDamage(UsedItem->BonusDamage);
+        GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("gained_damage"), UsedItem->BonusDamage));
+    }
+
+    //delete this item
+    // Set the item pointer in the LevelMap to nullptr
+    LevelMap[UsedItem->Location.x][UsedItem->Location.y].CurrentItem = nullptr;
+
+    // Erase the entity from the EntitiesOnLevel vector
+    for (auto it = ItemsOnLevel.begin(); it != ItemsOnLevel.end(); ++it) {
+        if ((*it)->Location == UsedItem->Location) {
+            ItemsOnLevel.erase(it);
+            delete UsedItem;
+            break;
+        }
+    }
+
 }
 
 void DungeonLevel::PutInQueue(int PositionOffset, Entity* ent)
@@ -302,6 +344,9 @@ void DungeonLevel::GenerateMap()
     for (auto* ent : EntitiesOnLevel) {
         delete ent;
     }
+    for (auto* ent : ItemsOnLevel) {
+        delete ent;
+    }
     MonsterQueue.clear();
     EntitiesOnLevel.clear();
     ItemsOnLevel.clear();
@@ -311,7 +356,6 @@ void DungeonLevel::GenerateMap()
     for (int i = 0; i < EntityCount; ++i) {
         Index = rand() % ValidTilesForSpawning.size();
         if (ValidTilesForSpawning[Index]->Arch == Architecture::StairsUpTile || ValidTilesForSpawning[Index]->Entity) continue;
-        //todo: add types of enemies and spawn them from their blueprints
         //get random entity
         MonsterData NewMonster;
         NewMonster.Weight = 0;
@@ -324,6 +368,33 @@ void DungeonLevel::GenerateMap()
         NewEntity->Location = ValidTilesForSpawning[Index]->Coordinates;
         EntitiesOnLevel.push_back(NewEntity);
         ValidTilesForSpawning[Index]->Entity = EntitiesOnLevel.back();
+    }
+
+    int ItemsCount = (rand() % 8) + 2;
+
+    for (int i = 0; i < ItemsCount; ++i) {
+        Index = rand() % ValidTilesForSpawning.size();
+        if (ValidTilesForSpawning[Index]->Arch == Architecture::StairsUpTile || ValidTilesForSpawning[Index]->CurrentItem) continue;
+        //get random entity
+        int ItemType = rand() % 4;
+        Item* NewItem = new Item();
+        switch (ItemType) {
+        case 0:
+            NewItem->Type = ItemTypes::StrengthRuneItem;
+            NewItem->BonusDamage = MAX(LevelIndex * STRENGTH_DEPTH_MULTIPLIER, 1);
+            break;
+        case 1:
+            NewItem->Type = ItemTypes::VitalityRuneItem;
+            NewItem->BonusPermaHP = MAX(LevelIndex * MAX_HP_DEPTH_MULTIPLIER, 10);
+            break;
+        default:
+            NewItem->Type = ItemTypes::HealingPotionItem;
+            NewItem->BonusHP = MAX(LevelIndex * HEALING_DEPTH_MULTIPLIER, 25);
+        }
+        NewItem->Location = ValidTilesForSpawning[Index]->Coordinates;
+
+        ItemsOnLevel.push_back(NewItem);
+        ValidTilesForSpawning[Index]->CurrentItem = ItemsOnLevel.back();
     }
 
     
@@ -419,14 +490,14 @@ bool DungeonLevel::SaveMapToSave()
 
     // Save the entities
     for (auto& ent : EntitiesOnLevel) {
-        file << static_cast<int>(ent->Type) << ' ' << ent->Location.x << ' ' << ent->Location.y << ' ' << ent->GetHP() << ' ' << ent->GetMaxHP() << ' ' << ent->GetDamage() << ent->GetSpeed() <<  std::endl;
+        file << static_cast<int>(ent->Type) << ' ' << ent->Location.x << ' ' << ent->Location.y << ' ' << ent->GetHP() << ' ' << ent->GetMaxHP() << ' ' << ent->GetDamage() << ' ' << ent->GetSpeed() << std::endl;
     }
 
     file << std::endl;
 
     // Save the items
     for (const auto& item : ItemsOnLevel) {
-        file << static_cast<int>(item.Type) << ' ' << item.Location.x << ' ' << item.Location.y << ' ' << item.BonusHP << ' ' << item.BonusDamage << std::endl;
+        file << static_cast<int>(item->Type) << ' ' << item->Location.x << ' ' << item->Location.y << ' ' << item->BonusHP << ' ' << item->BonusDamage << ' ' << item->BonusPermaHP << std::endl;
     }
     file.close();
 
@@ -465,14 +536,17 @@ std::vector<TileToDraw> DungeonLevel::GatherTilesForRender()
 
     for (auto& elem : ItemsOnLevel)
     {
-        if (elem.Type == ItemTypes::Empty) {
+        if (elem->Type == ItemTypes::Empty) {
             continue;
         }
-        if (elem.Type == ItemTypes::BowItem) {
-            GatheredTiles.push_back(TileToDraw(elem.Location.x, elem.Location.y, TileTypes::Bow));
-        }
-        if (elem.Type == ItemTypes::SwordItem) {
-            GatheredTiles.push_back(TileToDraw(elem.Location.x, elem.Location.y, TileTypes::Sword));
+        if (elem->Type == ItemTypes::HealingPotionItem) {
+            GatheredTiles.push_back(TileToDraw(elem->Location.x, elem->Location.y, TileTypes::HealingPotion));
+        }                                          
+        if (elem->Type == ItemTypes::VitalityRuneItem) {
+            GatheredTiles.push_back(TileToDraw(elem->Location.x, elem->Location.y, TileTypes::VitalityRune));
+        }                                          
+        if (elem->Type == ItemTypes::StrengthRuneItem) {
+            GatheredTiles.push_back(TileToDraw(elem->Location.x, elem->Location.y, TileTypes::StrengthRune));
         }
     }
 
@@ -776,7 +850,7 @@ bool DungeonLevel::IsUseAvailable()
     if (LevelMap[PlayerPos.x][PlayerPos.y].Arch == Architecture::StairsDownTile || (LevelMap[PlayerPos.x][PlayerPos.y].Arch == Architecture::StairsUpTile && LevelIndex != 1)) {
         return true;
     }
-    if (!LevelMap[PlayerPos.x][PlayerPos.y].Items.empty()) {
+    if (LevelMap[PlayerPos.x][PlayerPos.y].CurrentItem) {
         return true;
     }
     return false;

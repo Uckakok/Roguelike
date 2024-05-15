@@ -31,4 +31,7 @@ public:
 	int GetHP();
 	int GetMaxHP();
 	int GetSpeed();
+	void AddMaxHP(int Bonus);
+	void AddDamage(int Bonus);
+	void Heal(int Bonus);
 };

@@ -170,6 +170,16 @@ void GameEngine::RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback New
     if (bShouldUse) {
         bShouldUse = false;
         CurrentDungeon.UseCurrentObject();
+        windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
+        windowContext->windowUpdate();
+        if (g_ShowUseCallback) {
+            if (CurrentDungeon.IsUseAvailable()) {
+                g_ShowUseCallback(true);
+            }
+            else {
+                g_ShowUseCallback(false);
+            }
+        }
     }
 
     PlayerMove = windowContext->GetClickPosition();

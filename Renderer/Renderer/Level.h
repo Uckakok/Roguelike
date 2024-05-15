@@ -23,21 +23,35 @@ struct Node {
 };
 
 struct Item {
-	ItemTypes Type;
-	Position Location;
-	int BonusHP;
-	int BonusDamage;
+	ItemTypes Type = ItemTypes::Empty;
+	Position Location = Position();
+	int BonusHP = 0;
+	int BonusDamage = 0;
+	int BonusPermaHP = 0;
 	//list of buffs or sth
 
-	Item(ItemTypes NewType, Position NewPosition, int NewBonusHP, int NewBonusDamage) : Type(NewType), Location(NewPosition), BonusHP(NewBonusHP), BonusDamage(NewBonusDamage) { ; };
+	Item(ItemTypes NewType, Position NewPosition, int NewBonusHP, int NewBonusDamage, int NewBonusPermaHP) : Type(NewType), Location(NewPosition), BonusHP(NewBonusHP), BonusDamage(NewBonusDamage), BonusPermaHP(NewBonusPermaHP) { ; };
 	Item() = default;
 };
+
+inline BSTR ToString(ItemTypes Type) {
+	switch (Type) {
+	case ItemTypes::HealingPotionItem:
+		return LOCALIZED_TEXT("healing_potion");
+	case ItemTypes::StrengthRuneItem:
+		return LOCALIZED_TEXT("strength_rune");
+	case ItemTypes::VitalityRuneItem:
+		return LOCALIZED_TEXT("vitality_rune");
+	default:
+		return LOCALIZED_TEXT("error");
+	}
+}
 
 struct LevelTile {
 	Position Coordinates;
 	Architecture Arch;
 	Entity* Entity = nullptr;
-	std::vector<Item*> Items;
+	Item* CurrentItem = nullptr;
 };
 
 class DungeonLevel {
@@ -65,6 +79,7 @@ public:
 
 	HoverInfo ConstructHoverInfo(Position HoverPosition);
 private:
+	void UseItem(Item* UsedItem);
 	void PutInQueue(int PositionOffset, Entity* ent);
 	void ConnectAreas(std::vector<std::vector<Position>>& Areas);
 	std::vector<Position> FindAllConnected(Position StartPos, std::vector<std::vector<LevelTile>>* NewMap);
@@ -76,6 +91,6 @@ private:
 
 	int DeclaredBoardSize = 0;
 
-	std::vector<Item> ItemsOnLevel;
+	std::vector<Item*> ItemsOnLevel;
 	std::vector<Entity*> EntitiesOnLevel;
 };

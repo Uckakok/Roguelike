@@ -73,3 +73,24 @@ msgstr "Skeleton"
 
 msgid "gnoll_entity"
 msgstr "Gnoll"
+
+msgid "vitality_rune"
+msgstr "Vitality Rune"
+
+msgid "used_item"
+msgstr "You used %s"
+
+msgid "gained_max_hp"
+msgstr "You gained +%d max hp"
+
+msgid "gained_damage"
+msgstr "You gained +%d damage"
+
+msgid "healing_potion"
+msgstr "Healing Potion"
+
+msgid "healed"
+msgstr "You healed %d hp"
+
+msgid "strength_rune"
+msgstr "Strength Rune"

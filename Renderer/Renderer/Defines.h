@@ -10,11 +10,17 @@
 #define EXTENSION	".XDD"
 #define MAX_LEVEL	50
 #define MONSTER_SPAWN_RANDOMIZER	6
+#define STRENGTH_DEPTH_MULTIPLIER	1
+#define HEALING_DEPTH_MULTIPLIER	8
+#define MAX_HP_DEPTH_MULTIPLIER		4
+
+#define MAX(x, y) x > y ? x : y;
 
 enum ItemTypes {
 	Empty,
-	SwordItem,
-	BowItem,
+	HealingPotionItem,
+	VitalityRuneItem,
+	StrengthRuneItem,
 };
 
 enum Architecture {
@@ -45,8 +51,9 @@ enum EntityTypes {
 enum TileTypes {
 	Floor,
 	Wall,
-	Sword,
-	Bow,
+	HealingPotion,
+	VitalityRune,
+	StrengthRune,
 	Player,
 	Goblin,
 	Orc,
@@ -149,10 +156,12 @@ struct Sprite {
 			return "Resources/Textures/WallTile.png";
 		case TileTypes::Player:
 			return "Resources/Textures/PlayerSprite.png";
-		case TileTypes::Bow:
-			return "Resources/Textures/ItemBow.png";
-		case TileTypes::Sword:
-			return "Resources/Textures/ItemSword.png";
+		case TileTypes::HealingPotion:
+			return "Resources/Textures/HealingPotion.png";
+		case TileTypes::VitalityRune:
+			return "Resources/Textures/VitalityRune.png";
+		case TileTypes::StrengthRune:
+			return "Resources/Textures/StrengthRune.png";
 		case TileTypes::Goblin:
 			return "Resources/Textures/GoblinSprite.png";
 		case TileTypes::Orc:
