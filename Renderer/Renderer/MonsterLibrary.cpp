@@ -25,7 +25,7 @@ void MonsterManager::ReadMonsterDataFromFile()
 
         int Type;
 
-        if (!(iss >> Type >> NewMonsterEntry.LocalizationKey >> NewMonsterEntry.Damage >> NewMonsterEntry.MaxHP >> NewMonsterEntry.Weight)) {
+        if (!(iss >> Type >> NewMonsterEntry.LocalizationKey >> NewMonsterEntry.Damage >> NewMonsterEntry.MaxHP >> NewMonsterEntry.Speed >> NewMonsterEntry.Weight)) {
             MessageBox(nullptr, L"Incorrectly formatten monsters.mon file", L"Error", MB_OK | MB_ICONERROR);
             continue;
         }

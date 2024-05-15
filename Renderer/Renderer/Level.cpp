@@ -114,17 +114,17 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
 
     DeclaredBoardSize = BoardSize;
 
-    int entityID, x, y, HP, MaxHP, Damage;
+    int entityID, x, y, HP, MaxHP, Damage, Speed;
     while (std::getline(file, line)) {
         if (line.empty()) {
             break;
         }
 
         std::istringstream iss(line);
-        iss >> entityID >> x >> y >> HP >> MaxHP >> Damage;
+        iss >> entityID >> x >> y >> HP >> MaxHP >> Damage >> Speed;
 
         if (entityID != 0) {
-            EntitiesOnLevel.push_back(new Entity(static_cast<EntityTypes>(entityID), Position(x, y), HP, MaxHP, Damage));
+            EntitiesOnLevel.push_back(new Entity(static_cast<EntityTypes>(entityID), Position(x, y), HP, MaxHP, Damage, Speed));
         }
     }
 
@@ -419,7 +419,7 @@ bool DungeonLevel::SaveMapToSave()
 
     // Save the entities
     for (auto& ent : EntitiesOnLevel) {
-        file << static_cast<int>(ent->Type) << ' ' << ent->Location.x << ' ' << ent->Location.y << ' ' << ent->GetHP() << ' ' << ent->GetMaxHP() << ' ' << ent->GetDamage() << std::endl;
+        file << static_cast<int>(ent->Type) << ' ' << ent->Location.x << ' ' << ent->Location.y << ' ' << ent->GetHP() << ' ' << ent->GetMaxHP() << ' ' << ent->GetDamage() << ent->GetSpeed() <<  std::endl;
     }
 
     file << std::endl;
@@ -547,7 +547,7 @@ bool DungeonLevel::PerformAction(Position PlayerMove)
             GameEngine::GetInstance()->AppendLogger(FORMAT(LOCALIZED_WSTRING("kill_who").c_str(), LOCALIZED_TEXT(GETMONSTERKEY(EntityOnTile->Type))));
             KillEntityOnPosition(PlayerMove);
         }
-        PutInQueue(5, PlayerEntity);
+        PutInQueue(PlayerEntity->GetSpeed(), PlayerEntity);
         for (auto it = MonsterQueue.front().begin(); it != MonsterQueue.front().end(); ++it) {
             if (*it == GetPlayer()) {
                 MonsterQueue.front().erase(it);
@@ -561,7 +561,7 @@ bool DungeonLevel::PerformAction(Position PlayerMove)
     PlayerEntity->Location = PlayerMove;
     LevelMap[PlayerEntity->Location.x][PlayerEntity->Location.y].Entity = PlayerEntity;
 
-    PutInQueue(4, PlayerEntity);
+    PutInQueue(PlayerEntity->GetSpeed(), PlayerEntity);
     for (auto it = MonsterQueue.front().begin(); it != MonsterQueue.front().end(); ++it) {
         if (*it == GetPlayer()) {
             MonsterQueue.front().erase(it);
@@ -584,7 +584,7 @@ bool DungeonLevel::MoveEntity(Entity* EntityToMove)
     if (PathToTake.size() < 2) {
         // invalid path. No way to reach the goal
         //MessageBox(nullptr, L"No valid path to move the entity", L"Error", MB_OK | MB_ICONERROR);
-        PutInQueue(4, EntityToMove);
+        PutInQueue(EntityToMove->GetSpeed(), EntityToMove);
         return false;
     }
 
@@ -605,7 +605,7 @@ bool DungeonLevel::MoveEntity(Entity* EntityToMove)
             }
         }
 
-        PutInQueue(8, EntityToMove);
+        PutInQueue(EntityToMove->GetSpeed(), EntityToMove);
         return true;
     }
 
@@ -613,7 +613,7 @@ bool DungeonLevel::MoveEntity(Entity* EntityToMove)
     EntityToMove->Location = NextMove;
     LevelMap[EntityToMove->Location.x][EntityToMove->Location.y].Entity = EntityToMove;
 
-    PutInQueue(6, EntityToMove);
+    PutInQueue(EntityToMove->GetSpeed(), EntityToMove);
     return true;
 }
 

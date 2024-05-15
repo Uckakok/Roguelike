@@ -33,3 +33,8 @@ int Entity::GetMaxHP()
 {
     return MaxHP;
 }
+
+int Entity::GetSpeed()
+{
+    return Speed;
+}

@@ -11,10 +11,11 @@ struct MonsterData {
     int Damage;
     int MaxHP;
     int Weight;
+    int Speed;
 };
 
 inline Entity ToEntity(MonsterData Mon) {
-    return Entity(Mon.Type, Position(), Mon.MaxHP, Mon.MaxHP, Mon.Damage);
+    return Entity(Mon.Type, Position(), Mon.MaxHP, Mon.MaxHP, Mon.Damage, Mon.Speed);
 }
 
 class MonsterManager
