@@ -1,0 +1,96 @@
+msgid ""
+msgstr ""
+"Language: Tibetan\n"
+
+msgid "error"
+msgstr "ནོར་འཁྲུལ"
+
+msgid "floor"
+msgstr "གོང་གི་ས་ཁུལ"
+
+msgid "out_of_bounds"
+msgstr "སྐོར་འབྲེལ་འགྱོ་ནི"
+
+msgid "stairs_down"
+msgstr "སྒོམ་རིམ་ཡར་འཛེགས་པ"
+
+msgid "player_entity"
+msgstr "དགའ་རོགས་པ"
+
+msgid "goblin_entity"
+msgstr "གོ་བ་ལིན"
+
+msgid "stairs_up"
+msgstr "སྒོམ་རིམ་མར་གྱོན་པ"
+
+msgid "wall"
+msgstr "རྒྱབ་སྟེང་"
+
+msgid "use_text"
+msgstr "ལག་ལེན་"
+
+msgid "climb_downwards"
+msgstr "ཁྱེད་རང་མར་འཛེགས་ནི..."
+
+msgid "climb_upwards"
+msgstr "ཁྱེད་རང་ཡར་འཛེགས་ནི..."
+
+msgid "deal_damage_to"
+msgstr "ཁྱེད་རང་གིས་ %d ལུ་ %s གནོད་རྒྱགས་བྱེད་པ་"
+
+msgid "kill_who"
+msgstr "ཁྱེད་རང་གིས་ %s གཏོང་བསད་པ་"
+
+msgid "dealt_damage_to_you"
+msgstr "%s ཁྱེད་ལུ་ %d གནོད་རྒྱགས་བྱེད་པ་"
+
+msgid "orc_entity"
+msgstr "ཨོརཀ"
+
+msgid "drake_entity"
+msgstr "དཀྲགས་ཡོལ་"
+
+msgid "griffin_entity"
+msgstr "གྲིཕ་བིན"
+
+msgid "angel_entity"
+msgstr "ཨེན་ཇལ"
+
+msgid "dwarf_entity"
+msgstr "དྭརྦ"
+
+msgid "dendroid_entity"
+msgstr "དེན་དྲོའིད་"
+
+msgid "golden_dragon_entity"
+msgstr "གསེར་གྱི་འབུམ་མིག"
+
+msgid "imp_entity"
+msgstr "ཨིམ་པི་"
+
+msgid "skeleton_entity"
+msgstr "རིལ་པོར་སྟོད་"
+
+msgid "gnoll_entity"
+msgstr "གོ་ནོལ"
+
+msgid "vitality_rune"
+msgstr "ཚུལ་རྒྱན་གྱི་རུབ་"
+
+msgid "used_item"
+msgstr "ཁྱེད་རང་གིས་ %s ལག་ལེན་པ་"
+
+msgid "gained_max_hp"
+msgstr "ཁྱེད་རང་གིས་ +%d སྡུག་སྐྱིད་གྱི་མང་ཉུང་འཛིན་ཡི་"
+
+msgid "gained_damage"
+msgstr "ཁྱེད་རང་གིས་ +%d གནོད་རྒྱགས་དང་འདྲི་བ་"
+
+msgid "healing_potion"
+msgstr "ཚིག་སྡུག་སྐྱིད་གྱི་བརྟན་རྒྱས་ཁྲིད་"
+
+msgid "healed"
+msgstr "ཁྱེད་རང་གིས་ %d གནོད་རྒྱགས་འཚེར་སྒྲིག་པ་"
+
+msgid "strength_rune"
+msgstr "ནུས་ཚུལ་རྒྱན་གྱི་རུབ་"

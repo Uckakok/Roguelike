@@ -28,6 +28,10 @@ enum Architecture {
 	WallTile,
 	StairsDownTile,
 	StairsUpTile,
+	StairsAirTile,
+	StairsFireTile,
+	StairsWaterTile,
+	StairsEarthTile,
 	Visited, //for generating maps only
 };
 
@@ -69,6 +73,10 @@ enum TileTypes {
 	Highlight,
 	StairsDown,
 	StairsUp,
+	StairsEarth,
+	StairsWater,
+	StairsAir,
+	StairsFire,
 
 	Num
 };
@@ -83,6 +91,14 @@ inline BSTR ToString(Architecture arch) {
 		return LOCALIZED_TEXT("stairs_down");
 	case Architecture::StairsUpTile:
 		return LOCALIZED_TEXT("stairs_up");
+	case Architecture::StairsAirTile:
+		return LOCALIZED_TEXT("stairs_air");
+	case Architecture::StairsFireTile:
+		return LOCALIZED_TEXT("stairs_fire");
+	case Architecture::StairsEarthTile:
+		return LOCALIZED_TEXT("stairs_earth");
+	case Architecture::StairsWaterTile:
+		return LOCALIZED_TEXT("stairs_water");
 	default:
 		return LOCALIZED_TEXT("invalid");
 	}

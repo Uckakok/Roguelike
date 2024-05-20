@@ -67,15 +67,23 @@ void DungeonLevel::SpawnPlayer(bool bFromUp, Entity* Player)
 
 bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
 {
-    
-    std::ifstream file(SaveName);
-    if (!file.is_open()) {
-        //std::string errorMessage = "Failed to load dungeon save: " + SaveName;
-        //MessageBox(nullptr, std::wstring(errorMessage.begin(), errorMessage.end()).c_str(), L"Error", MB_OK | MB_ICONERROR);
-        return false;
-    }
 
-    //save current level
+    std::ifstream file;
+    if (LevelIndex == 25) {
+        file = std::ifstream("Resources/Level25.XDD");
+        if (!file.is_open()) {
+            MessageBox(nullptr, L"Couldn't load Level25.XDD blueprint. Verify your installation", L"Error", MB_OK | MB_ICONERROR);
+            return false;
+        }
+    }
+    else {
+        file = std::ifstream(SaveName);
+        if (!file.is_open()) {
+            //std::string errorMessage = "Failed to load dungeon save: " + SaveName;
+            //MessageBox(nullptr, std::wstring(errorMessage.begin(), errorMessage.end()).c_str(), L"Error", MB_OK | MB_ICONERROR);
+            return false;
+        }
+    }
 
     for (auto* ent : EntitiesOnLevel) {
         delete ent;

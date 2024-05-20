@@ -1,0 +1,96 @@
+msgid ""
+msgstr ""
+"Language: Chinese Simplified\n"
+
+msgid "error"
+msgstr "错误"
+
+msgid "floor"
+msgstr "地面"
+
+msgid "out_of_bounds"
+msgstr "出界"
+
+msgid "stairs_down"
+msgstr "下楼梯"
+
+msgid "player_entity"
+msgstr "玩家"
+
+msgid "goblin_entity"
+msgstr "哥布林"
+
+msgid "stairs_up"
+msgstr "上楼梯"
+
+msgid "wall"
+msgstr "墙"
+
+msgid "use_text"
+msgstr "使用"
+
+msgid "climb_downwards"
+msgstr "你往下爬..."
+
+msgid "climb_upwards"
+msgstr "你往上爬..."
+
+msgid "deal_damage_to"
+msgstr "你对 %d 造成 %s 点伤害"
+
+msgid "kill_who"
+msgstr "你杀了%s"
+
+msgid "dealt_damage_to_you"
+msgstr "%s 对你造成了 %d 点伤害"
+
+msgid "orc_entity"
+msgstr "兽人"
+
+msgid "drake_entity"
+msgstr "德雷克"
+
+msgid "griffin_entity"
+msgstr "格里芬"
+
+msgid "angel_entity"
+msgstr "天使"
+
+msgid "dwarf_entity"
+msgstr "矮人"
+
+msgid "dendroid_entity"
+msgstr "树突状体"
+
+msgid "golden_dragon_entity"
+msgstr "金龙"
+
+msgid "imp_entity"
+msgstr "小鬼"
+
+msgid "skeleton_entity"
+msgstr "骨骼"
+
+msgid "gnoll_entity"
+msgstr "豺狼人"
+
+msgid "vitality_rune"
+msgstr "元气符文”
+
+msgid "used_item"
+msgstr "您使用了 %s"
+
+msgid "gained_max_hp"
+msgstr "你获得了 +%d 最大生命值"
+
+msgid "gained_damage"
+msgstr "你获得了 +%d 伤害"
+
+msgid "healing_potion"
+msgstr "治疗药水"
+
+msgid "healed"
+msgstr "你治愈了 %d 点生命值"
+
+msgid "strength_rune"
+msgstr "力量符文"
