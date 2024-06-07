@@ -284,22 +284,19 @@ void DungeonLevel::GenerateMap()
         GeneratedMap.push_back(Row);
     }
 
-    int NumRectangles = 24; //generate them somehow
-    int MaxSize = 6; //generate this somehow
+    int NumRectangles = 24;
+    int MaxSize = 6;
     int MinSize = 3;
     srand(time(0));
 
     //add random rectangles on the map
     for (int r = 0; r < NumRectangles; ++r) {
-        // Random position for the top-left corner of the rectangle
         int startX = rand() % (LEVEL_SIZE - MaxSize);
         int startY = rand() % (LEVEL_SIZE - MaxSize);
 
-        // Random size for the rectangle
         int width = MinSize + rand() % (MaxSize - MinSize + 1);
         int height = MinSize + rand() % (MaxSize - MinSize + 1);
 
-        // Fill the rectangle with Architecture::Floor
         for (int i = startX; i < startX + width; ++i) {
             for (int j = startY; j < startY + height; ++j) {
                 GeneratedMap[i][j].Arch = Architecture::FloorTile;
@@ -308,7 +305,6 @@ void DungeonLevel::GenerateMap()
     }
 
     DeclaredBoardSize = LEVEL_SIZE;
-
     std::vector<std::vector<Position>> Areas;
 
     for (int i = 0; i < LEVEL_SIZE; ++i) {

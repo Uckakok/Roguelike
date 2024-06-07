@@ -4,22 +4,19 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Forms;
-using System.Windows.Forms.Integration;
 using System.IO;
 using System.Windows.Threading;
-using System.Runtime.InteropServices.ComTypes;
 
 namespace TestXaml
 {
     public partial class MainWindow : Window
     {
-        private readonly HoverCallback hoverCallbackDelegate;
-        private readonly ShowUseCallback showUseCallbackDelegate;
-        private readonly LoggerCallback loggerCallbackDelegate;
+        private readonly HoverCallback HoverCallbackDelegate;
+        private readonly ShowUseCallback ShowUseCallbackDelegate;
+        private readonly LoggerCallback LoggerCallbackDelegate;
 
-        private IntPtr otherWindow;
-        private IntPtr thisWindow;
+        private IntPtr OtherWindow;
+        private IntPtr ThisWindow;
 
         [DllImport("winmm.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
         static extern uint timeSetEvent(uint uDelay, uint uResolution, TimerCallback lpTimeProc, IntPtr dwUser, uint fuEvent);
@@ -27,45 +24,40 @@ namespace TestXaml
         [DllImport("winmm.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
         static extern uint timeKillEvent(uint uTimerID);
 
-        // Define the multimedia timer callback delegate
         private delegate void TimerCallback(uint uTimerID, uint uMsg, ref IntPtr dwUser, ref IntPtr dw1, ref IntPtr dw2);
 
-        // Define the multimedia timer resolution (1 ms)
         private const uint TimerResolution = 1;
 
-        // Define the multimedia timer interval (e.g., 16 ms for approximately 60 FPS)
+        // 16 ms for 60 FPS
         private const uint TimerInterval = 16;
 
-        // Define the multimedia timer ID
-        private uint timerId;
+        private uint TimerId;
 
-        private TimerCallback timerCallbackDelegate;
+        private TimerCallback TimerCallbackDelegate;
 
-        // Define a delegate for the button state callback function
         public delegate void HoverCallback([MarshalAs(UnmanagedType.BStr)] string Name, int CurrentHP, int MaxHP);
 
         public delegate void LoggerCallback([MarshalAs(UnmanagedType.BStr)] string Name);
 
-        // Define a delegate for the window handle callback function
         public delegate void WindowHandleCallback(IntPtr windowHandle);
 
         public delegate void ShowUseCallback(bool bShow);
 
         bool bShouldUse = false;
-        private bool isGameTickRunning = false;
+        private bool bIsGameTickRunning = false;
 
-        private int frameCount = 0;
-        private DateTime lastCheckTime = DateTime.Now;
-        private int fps = 0;
+        private int FrameCount = 0;
+        private DateTime LastCheckTime = DateTime.Now;
+        private int Fps = 0;
 
         public MainWindow()
         {
             InitializeComponent();
 
 
-            hoverCallbackDelegate = new HoverCallback(HoverCallbackFunction);
-            showUseCallbackDelegate = new ShowUseCallback(ShowUseCallbackFunction);
-            loggerCallbackDelegate = new LoggerCallback(LoggerCallbackFunction);
+            HoverCallbackDelegate = new HoverCallback(HoverCallbackFunction);
+            ShowUseCallbackDelegate = new ShowUseCallback(ShowUseCallbackFunction);
+            LoggerCallbackDelegate = new LoggerCallback(LoggerCallbackFunction);
             LoadLanguagesFromLocalizationDirectory();
         }
 
@@ -116,11 +108,11 @@ namespace TestXaml
             Closing += Window_Closing;
             UseButton.Click += UseButton_Click;
 
-            timerCallbackDelegate = TimerCallbackFunction;
+            TimerCallbackDelegate = TimerCallbackFunction;
 
             // Create the multimedia timer
-            timerId = timeSetEvent(TimerInterval, TimerResolution, timerCallbackDelegate, IntPtr.Zero, 1);
-            if (timerId == 0)
+            TimerId = timeSetEvent(TimerInterval, TimerResolution, TimerCallbackDelegate, IntPtr.Zero, 1);
+            if (TimerId == 0)
             {
                 System.Windows.MessageBox.Show("Failed to create multimedia timer", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
@@ -129,9 +121,9 @@ namespace TestXaml
 
         private void TimerCallbackFunction(uint uTimerID, uint uMsg, ref IntPtr dwUser, ref IntPtr dw1, ref IntPtr dw2)
         {
-            if (!isGameTickRunning)
+            if (!bIsGameTickRunning)
             {
-                isGameTickRunning = true;
+                bIsGameTickRunning = true;
                 // Call the GameTick function
                 Dispatcher.Invoke(() =>
                 {
@@ -140,20 +132,20 @@ namespace TestXaml
                         bShouldUse = false;
                         UseActivated();
                     }
-                    GameTick(Marshal.GetFunctionPointerForDelegate(hoverCallbackDelegate), Marshal.GetFunctionPointerForDelegate(showUseCallbackDelegate), Marshal.GetFunctionPointerForDelegate(loggerCallbackDelegate));
+                    GameTick(Marshal.GetFunctionPointerForDelegate(HoverCallbackDelegate), Marshal.GetFunctionPointerForDelegate(ShowUseCallbackDelegate), Marshal.GetFunctionPointerForDelegate(LoggerCallbackDelegate));
 
-                    frameCount++;
+                    FrameCount++;
                     var currentTime = DateTime.Now;
-                    var elapsedTime = currentTime - lastCheckTime;
+                    var elapsedTime = currentTime - LastCheckTime;
                     if (elapsedTime.TotalSeconds >= 1)
                     {
-                        fps = (int)(frameCount / elapsedTime.TotalSeconds);
-                        frameCount = 0;
-                        lastCheckTime = currentTime;
-                        FpsText.Text = "FPS: " + fps.ToString();
+                        Fps = (int)(FrameCount / elapsedTime.TotalSeconds);
+                        FrameCount = 0;
+                        LastCheckTime = currentTime;
+                        FpsText.Text = "FPS: " + Fps.ToString();
                     }
                 });
-                isGameTickRunning = false;
+                bIsGameTickRunning = false;
             }
         }
 
@@ -168,20 +160,19 @@ namespace TestXaml
         {
             Dispatcher.Invoke(() =>
             {
-                if (timerId != 0)
+                if (TimerId != 0)
                 {
-                    timeKillEvent(timerId);
-                    timerId = 0;
+                    timeKillEvent(TimerId);
+                    TimerId = 0;
                 }
 
                 SavePostExit();
-                Environment.Exit(0); // Exit the program when the window is closing
+                Environment.Exit(0);
             });
         }
 
         private void InitializeOpenGL()
         {
-            // Call native code to initialize OpenGL and pass the delegate
             InitializeGame(Marshal.GetFunctionPointerForDelegate(new WindowHandleCallback(WindowCallback)));
         }
 
@@ -237,14 +228,12 @@ namespace TestXaml
                 }
                 else
                 {
-                    // Construct the new text
                     string newText = Name;
                     if (CurrentHP != 0)
                     {
                         newText += "\nHP: " + CurrentHP + "/" + MaxHP;
                     }
 
-                    // Set the text in HoverInfoText
                     HoverInfoText.Text = newText;
                 }
             });
@@ -268,14 +257,12 @@ namespace TestXaml
         // Callback method to receive the window handle from native code
         private void WindowCallback(IntPtr windowHandle)
         {
-            otherWindow = windowHandle;
+            OtherWindow = windowHandle;
 
-            thisWindow = new WindowInteropHelper(this).Handle;
+            ThisWindow = new WindowInteropHelper(this).Handle;
 
-            //This bit removes the border of otherWindow and sets thisWindow as parent
-            //I actually don't know what flags should be set, but simply setting the WS_VISIBLE flag seems to make window work, however borderless.
-            WinHelper.SetWindowLong(otherWindow, WinHelper.GWL_STYLE, WinHelper.winStyle.WS_VISIBLE | WinHelper.winStyle.WS_CHILD);
-            WinHelper.SetParent(otherWindow, thisWindow);
+            WinHelper.SetWindowLong(OtherWindow, WinHelper.GWL_STYLE, WinHelper.winStyle.WS_VISIBLE | WinHelper.winStyle.WS_CHILD);
+            WinHelper.SetParent(OtherWindow, ThisWindow);
             ArrangeWindows();
         }
 
@@ -284,9 +271,9 @@ namespace TestXaml
             //Moves the otherWindow on top of childPlaceHolder
             Point topLeft = childPlaceholder.TransformToAncestor(this).Transform(new Point(0, 0));
             Point bottomRight = childPlaceholder.TransformToAncestor(this).Transform(new Point(childPlaceholder.ActualWidth, childPlaceholder.ActualHeight));
-            WinHelper.MoveWindow(otherWindow, (int)topLeft.X, (int)topLeft.Y, (int)bottomRight.X - (int)topLeft.X, (int)bottomRight.Y - (int)topLeft.Y, true);
+            WinHelper.MoveWindow(OtherWindow, (int)topLeft.X, (int)topLeft.Y, (int)bottomRight.X - (int)topLeft.X, (int)bottomRight.Y - (int)topLeft.Y, true);
 
-            WinHelper.SendWindowToBack(otherWindow);
+            WinHelper.SendWindowToBack(OtherWindow);
         }
     }
 
