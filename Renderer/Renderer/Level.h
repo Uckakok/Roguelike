@@ -76,7 +76,7 @@ public:
 	void PerformEntitiesTurn();
 	bool GetGameEnded();
 	bool IsUseAvailable();
-
+	bool GetGameWon();
 	HoverInfo ConstructHoverInfo(Position HoverPosition);
 private:
 	void UseItem(Item* UsedItem);
@@ -91,6 +91,7 @@ private:
 
 	int DeclaredBoardSize = 0;
 
+	bool bIsGameWon = false;
 	std::vector<Item*> ItemsOnLevel;
 	std::vector<Entity*> EntitiesOnLevel;
 };

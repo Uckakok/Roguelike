@@ -119,7 +119,23 @@ void GameEngine::SavePlayerState()
 
 void GameEngine::SavePostGame()
 {
-    if (!CurrentDungeon.GetGameEnded()) {
+    if (CurrentDungeon.GetGameWon()) {
+        //delete all player saves
+
+        for (const auto& entry : std::filesystem::directory_iterator(".")) {
+            if (entry.is_regular_file()) {
+                std::string filename = entry.path().filename().string();
+                if (filename.find(PlayerName) == 0 && filename.find(EXTENSION) == filename.size() - std::string(EXTENSION).size()) {
+                    std::error_code ec;
+                    std::filesystem::remove(entry, ec);
+                    if (ec) {
+                        MessageBox(nullptr, L"Couldn't delete one of the player files", L"Error", MB_OK | MB_ICONERROR);
+                    }
+                }
+            }
+        }
+    }
+    else if (!CurrentDungeon.GetGameEnded()) {
         SavePlayerState();
         CurrentDungeon.SaveMapToSave();
     }

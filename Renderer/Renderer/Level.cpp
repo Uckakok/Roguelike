@@ -75,6 +75,8 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
             MessageBox(nullptr, L"Couldn't load Level25.XDD blueprint. Verify your installation", L"Error", MB_OK | MB_ICONERROR);
             return false;
         }
+        MessageBox(nullptr, L"You won!\nClosing game window will restart your progress", L"Won", MB_OK | MB_ICONEXCLAMATION);
+        bIsGameWon = true;
     }
     else {
         file = std::ifstream(SaveName);
@@ -862,6 +864,11 @@ bool DungeonLevel::IsUseAvailable()
         return true;
     }
     return false;
+}
+
+bool DungeonLevel::GetGameWon()
+{
+    return bIsGameWon;
 }
 
 HoverInfo DungeonLevel::ConstructHoverInfo(Position HoverPosition)
