@@ -207,7 +207,7 @@ struct Sprite {
 		case TileTypes::StairsUp:
 			return "Resources/Textures/StairsUp.png";
 		default:
-			MessageBox(nullptr, L"Tried to load invalid sprite", L"Error", MB_OK | MB_ICONERROR);
+			//MessageBox(nullptr, L"Tried to load invalid sprite", L"Error", MB_OK | MB_ICONERROR);
 			return "";
 		}
 	}

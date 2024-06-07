@@ -28,10 +28,11 @@ extern "C" __declspec(dllexport) BSTR GetTranslation(const char* Key);
 
 extern "C" __declspec(dllexport) void ChangeLanguage(const char* Language);
 
+extern "C" __declspec(dllexport) void SavePostExit();
+
 
 class GameEngine {
 private:
-    
 
     GameEngine() = default;
 
@@ -44,7 +45,6 @@ private:
     LoggerCallback g_LoggerCallback = nullptr;
     graphicalInterface* windowContext;
     DungeonLevel CurrentDungeon;
-
 
     // Private destructor to prevent deletion
     ~GameEngine() = default;
@@ -64,6 +64,7 @@ private:
     void SavePlayerState();
 
 public:
+    void SavePostGame();
     std::string GetPlayerName();
     void LoadLevel(int LevelNumber);
     static GameEngine* GetInstance();

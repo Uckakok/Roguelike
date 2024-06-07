@@ -871,11 +871,14 @@ HoverInfo DungeonLevel::ConstructHoverInfo(Position HoverPosition)
         return HoverInfo(LOCALIZED_TEXT("out_of_bounds"), 0, 0);
     }
 
-    if (LevelMap[HoverPosition.x][HoverPosition.y].Entity == nullptr) {
-        return HoverInfo(ToString(LevelMap[HoverPosition.x][HoverPosition.y].Arch), 0, 1);
+    if (LevelMap[HoverPosition.x][HoverPosition.y].Entity) {
+        return HoverInfo(LOCALIZED_TEXT(GETMONSTERKEY(LevelMap[HoverPosition.x][HoverPosition.y].Entity->Type)), LevelMap[HoverPosition.x][HoverPosition.y].Entity->GetHP(), LevelMap[HoverPosition.x][HoverPosition.y].Entity->GetMaxHP());
+    }
+    else if (LevelMap[HoverPosition.x][HoverPosition.y].CurrentItem){
+        return HoverInfo(ToString(LevelMap[HoverPosition.x][HoverPosition.y].CurrentItem->Type), 0, 1);
     }
     else {
-        return HoverInfo(LOCALIZED_TEXT(GETMONSTERKEY(LevelMap[HoverPosition.x][HoverPosition.y].Entity->Type)), LevelMap[HoverPosition.x][HoverPosition.y].Entity->GetHP(), LevelMap[HoverPosition.x][HoverPosition.y].Entity->GetMaxHP());
+        return HoverInfo(ToString(LevelMap[HoverPosition.x][HoverPosition.y].Arch), 0, 1);
     }
 
     return HoverInfo(LOCALIZED_TEXT("error"), 0, 0);

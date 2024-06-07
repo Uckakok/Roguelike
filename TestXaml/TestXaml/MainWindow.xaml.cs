@@ -174,6 +174,7 @@ namespace TestXaml
                     timerId = 0;
                 }
 
+                SavePostExit();
                 Environment.Exit(0); // Exit the program when the window is closing
             });
         }
@@ -250,6 +251,8 @@ namespace TestXaml
         }
 
         // Import native methods
+        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void SavePostExit();
         [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern void UseActivated();
         [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]

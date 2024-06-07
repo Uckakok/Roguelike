@@ -117,6 +117,14 @@ void GameEngine::SavePlayerState()
     file.close();
 }
 
+void GameEngine::SavePostGame()
+{
+    if (!CurrentDungeon.GetGameEnded()) {
+        SavePlayerState();
+        CurrentDungeon.SaveMapToSave();
+    }
+}
+
 std::string GameEngine::GetPlayerName()
 {
     return PlayerName;
@@ -257,4 +265,9 @@ extern "C" __declspec(dllexport) BSTR GetTranslation(const char* Key)
 extern "C" __declspec(dllexport) void ChangeLanguage(const char* Language)
 {
     LocalizationManager::GetInstance()->ChangeLanguage(Language);
+}
+
+extern "C" __declspec(dllexport) void SavePostExit()
+{
+    GameEngine::GetInstance()->SavePostGame();
 }
