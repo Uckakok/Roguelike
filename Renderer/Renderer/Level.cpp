@@ -75,7 +75,7 @@ bool DungeonLevel::LoadMapFromSave(std::string& SaveName)
             MessageBox(nullptr, L"Couldn't load Level25.XDD blueprint. Verify your installation", L"Error", MB_OK | MB_ICONERROR);
             return false;
         }
-        MessageBox(nullptr, L"You won!\nClosing game window will restart your progress", L"Won", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, LOCALIZED_TEXT("win_dialogue"), LOCALIZED_TEXT("won"), MB_OK | MB_ICONEXCLAMATION);
         bIsGameWon = true;
     }
     else {
@@ -683,7 +683,7 @@ bool DungeonLevel::MoveEntity(Entity* EntityToMove)
         if (EntityOnTile->IsDead()) {
             if (EntityOnTile->IsPlayer()) {
                 KillEntityOnPosition(NextMove);
-                MessageBox(nullptr, L"You Died!", L"Game over", MB_OK | MB_ICONEXCLAMATION);
+                MessageBox(nullptr, L"you_died!", L"game_over", MB_OK | MB_ICONEXCLAMATION);
                 bIsGameEnded = true;
                 return true;
             }

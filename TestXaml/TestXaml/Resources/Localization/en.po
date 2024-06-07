@@ -94,3 +94,15 @@ msgstr "You healed %d hp"
 
 msgid "strength_rune"
 msgstr "Strength Rune"
+
+msgid "win_dialogue"
+msgstr "You won!\nClosing game window will restart your progress"
+
+msgid "you_died"
+msgstr "You Died"
+
+msgid "game_over"
+msgstr "Game Over"
+
+msgid "won"
+msgstr "You Won"
