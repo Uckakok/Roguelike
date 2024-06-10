@@ -7,7 +7,7 @@
 
 #define LEVEL_SIZE	32
 #define TILE_MIDDLE	32
-#define EXTENSION	".XDD"
+#define EXTENSION	".Rog"
 #define MAX_LEVEL	50
 #define MONSTER_SPAWN_RANDOMIZER	6
 #define STRENGTH_DEPTH_MULTIPLIER	1

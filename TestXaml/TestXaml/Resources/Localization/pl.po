@@ -14,10 +14,10 @@ msgstr "Poza granicami"
 msgid "stairs_down"
 msgstr "Schody w dół"
 
-msgid "player"
+msgid "player_entity"
 msgstr "Gracz"
 
-msgid "goblin"
+msgid "goblin_entity"
 msgstr "Goblin"
 
 msgid "stairs_up"
@@ -28,3 +28,81 @@ msgstr "Ściana"
 
 msgid "use_text"
 msgstr "Użyj"
+
+msgid "climb_downwards"
+msgstr "Schodzisz w dół..."
+
+msgid "climb_upwards"
+msgstr "Wchodzisz w górę..."
+
+msgid "deal_damage_to"
+msgstr "Zadajesz %d obrażeń %s"
+
+msgid "kill_who"
+msgstr "Zabijasz %s"
+
+msgid "dealt_damage_to_you"
+msgstr "%s zadał(a) ci %d obrażeń"
+
+msgid "orc_entity"
+msgstr "Ork"
+
+msgid "drake_entity"
+msgstr "Smok"
+
+msgid "griffin_entity"
+msgstr "Gryf"
+
+msgid "angel_entity"
+msgstr "Anioł"
+
+msgid "dwarf_entity"
+msgstr "Krasnolud"
+
+msgid "dendroid_entity"
+msgstr "Dendroid"
+
+msgid "golden_dragon_entity"
+msgstr "Złoty Smok"
+
+msgid "imp_entity"
+msgstr "Diabełek"
+
+msgid "skeleton_entity"
+msgstr "Szkielet"
+
+msgid "gnoll_entity"
+msgstr "Gnoll"
+
+msgid "vitality_rune"
+msgstr "Runiczna Witalność"
+
+msgid "used_item"
+msgstr "Użyłeś %s"
+
+msgid "gained_max_hp"
+msgstr "Zdobyłeś +%d maksymalne hp"
+
+msgid "gained_damage"
+msgstr "Zdobyłeś +%d obrażeń"
+
+msgid "healing_potion"
+msgstr "Mikstura Leczenia"
+
+msgid "healed"
+msgstr "Wyleczyłeś %d hp"
+
+msgid "strength_rune"
+msgstr "Runiczna Siła"
+
+msgid "win_dialogue"
+msgstr "Wygrałeś!\nZamknięcie okna gry zresetuje postęp"
+
+msgid "you_died"
+msgstr "Zginąłeś"
+
+msgid "game_over"
+msgstr "Koniec Gry"
+
+msgid "won"
+msgstr "Wygrałeś"
