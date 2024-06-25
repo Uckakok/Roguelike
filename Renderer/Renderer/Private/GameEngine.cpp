@@ -17,247 +17,260 @@
 #include <fstream>
 
 
-GameEngine* GameEngine::instance = nullptr;
+GameEngine* GameEngine::m_instance = nullptr;
 
 GameEngine* GameEngine::GetInstance()
 {
-    if (!instance) {
-        instance = new GameEngine();
+    if (!m_instance)
+    {
+        m_instance = new GameEngine();
     }
-    return instance;
+    return m_instance;
 }
 
 void GameEngine::InitializeEngine(WindowHwndCallback WindowCallback)
 {
-    // Store the callback function pointer
-    g_WindowCallback = WindowCallback;
+    m_windowCallback = WindowCallback;
+    m_windowContext = new GraphicalInterface();
 
-    windowContext = new graphicalInterface();
-
-    if (g_WindowCallback) {
-        HWND hWnd = glfwGetWin32Window(windowContext->GetWindow());
-        g_WindowCallback(hWnd);
+    if (m_windowCallback)
+    {
+        HWND hWnd = glfwGetWin32Window(m_windowContext->GetWindow());
+        m_windowCallback(hWnd);
     }
 
-    windowContext->MakeContextCurrent();
+    m_windowContext->MakeContextCurrent();
     PrepareMap();
 }
 
 void GameEngine::PrepareMap()
 {
-    windowContext->blendEnable();
-    windowContext->prepareVertexArray();
-    windowContext->prepareVertexBuffer();
-    windowContext->prepareShaders();
-    windowContext->unbindStuff();
-    windowContext->setupCallbacks();
-    windowContext->setupMatrices();
+    m_windowContext->EnableBlending();
+    m_windowContext->PrepareVertexArray();
+    m_windowContext->PrepareVertexBuffer();
+    m_windowContext->PrepareShaders();
+    m_windowContext->UnbindObjects();
+    m_windowContext->SetupCallbacks();
+    m_windowContext->SetupMatrices();
     LocalizationManager::GetInstance()->LoadAllLocalizedStrings();
     MonsterManager::GetInstance()->ReadMonsterDataFromFile();
 
     std::string LevelName;
 
-    std::string SaveSlot = PlayerName; //todo: add support for multiple saved characters
+    std::string SaveSlot = m_playerName; //todo: add support for multiple saved characters
     SaveSlot.append(EXTENSION);
 
-    std::ifstream file(SaveSlot); 
-    if (!file.is_open()) {
+    std::ifstream File(SaveSlot); 
+    if (!File.is_open()) 
+    {
         //player died. Generate new player save
         std::ofstream NewFile(SaveSlot);
-        if (!NewFile.is_open()) {
+        if (!NewFile.is_open()) 
+        {
             MessageBox(nullptr, L"Can't create a new save slot! Critical error", L"Error", MB_OK | MB_ICONERROR);
             return;
         }
-        NewFile << PlayerName << '1' << EXTENSION; //create first level
-        CurrentDungeon.LevelIndex = 1;
-        CurrentDungeon.GenerateMap();
-        PlayerCharacter = Entity(MonsterManager::GetInstance()->GetMonster(EntityTypes::PlayerEntity));
-        CurrentDungeon.SpawnPlayer(true, &PlayerCharacter);
-        windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
-        windowContext->NewPlayerCoords(CurrentDungeon.GetPlayerPosition());
+        NewFile << m_playerName << '1' << EXTENSION; //create first level
+        m_currentDungeon.LevelIndex = 1;
+        m_currentDungeon.GenerateMap();
+        m_PlayerCharacter = Entity(MonsterManager::GetInstance()->GetMonster(EntityTypes::PlayerEntity));
+        m_currentDungeon.SpawnPlayer(true, &m_PlayerCharacter);
+        m_windowContext->NewTilesToDraw(m_currentDungeon.GatherTilesForRender());
+        m_windowContext->NewPlayerCoords(m_currentDungeon.GetPlayerPosition());
         return;
     }
-    else {
-        file >> LevelName;
+    else 
+    {
+        File >> LevelName;
     }
 
-    if (!CurrentDungeon.LoadMapFromSave(LevelName)) {
+    if (!m_currentDungeon.LoadMapFromSave(LevelName)) 
+    {
         MessageBox(nullptr, L"Failed to load save, aborting.", L"Error", MB_OK | MB_ICONERROR);
         return;
     }
-    size_t digitPosition = LevelName.find_first_of("0123456789");
-    if (digitPosition != std::string::npos) {
-        std::string levelNumberString = LevelName.substr(digitPosition);
-        int levelNumber = std::stoi(levelNumberString);
-        CurrentDungeon.LevelIndex = levelNumber;
+    size_t DigitPosition = LevelName.find_first_of("0123456789");
+    if (DigitPosition != std::string::npos) 
+    {
+        std::string LevelNumberString = LevelName.substr(DigitPosition);
+        int LevelNumber = std::stoi(LevelNumberString);
+        m_currentDungeon.LevelIndex = LevelNumber;
     }
-    else {
+    else 
+    {
         MessageBox(nullptr, L"No level number found in the file name. Aborting", L"Error", MB_OK | MB_ICONERROR);
         return;
     }
-    windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
-    windowContext->NewPlayerCoords(CurrentDungeon.GetPlayerPosition());
+    m_windowContext->NewTilesToDraw(m_currentDungeon.GatherTilesForRender());
+    m_windowContext->NewPlayerCoords(m_currentDungeon.GetPlayerPosition());
 }
 
 void GameEngine::SavePlayerState()
 {
-    std::string SaveName = PlayerName;
+    std::string SaveName = m_playerName;
     SaveName.append(EXTENSION);
 
-
-    std::ofstream file(SaveName);
-    if (!file.is_open()) {
+    std::ofstream File(SaveName);
+    if (!File.is_open()) 
+    {
         std::wstring errorMessage = L"Failed to save player data: " + std::wstring(SaveName.begin(), SaveName.end());
         MessageBox(nullptr, errorMessage.c_str(), L"Error", MB_OK | MB_ICONERROR);
         return;
     }
 
-    file << PlayerName << CurrentDungeon.LevelIndex << EXTENSION;
+    File << m_playerName << m_currentDungeon.LevelIndex << EXTENSION;
+    File.close();
+}
 
-    file.close();
+void GameEngine::DeleteAllPlayerSaves()
+{
+    for (const auto& Entry : std::filesystem::directory_iterator("."))
+    {
+        if (!Entry.is_regular_file())
+        {
+            continue;
+        }
+        std::string Filename = Entry.path().filename().string();
+        if (Filename.find(m_playerName) == 0 && Filename.find(EXTENSION) == Filename.size() - std::string(EXTENSION).size())
+        {
+            std::error_code ErrorCode;
+            std::filesystem::remove(Entry, ErrorCode);
+            if (ErrorCode)
+            {
+                MessageBox(nullptr, L"Couldn't delete one of the player files", L"Error", MB_OK | MB_ICONERROR);
+            }
+        }
+    }
 }
 
 void GameEngine::SavePostGame()
 {
-    if (CurrentDungeon.GetGameWon()) {
-        //delete all player saves
-
-        for (const auto& entry : std::filesystem::directory_iterator(".")) {
-            if (entry.is_regular_file()) {
-                std::string filename = entry.path().filename().string();
-                if (filename.find(PlayerName) == 0 && filename.find(EXTENSION) == filename.size() - std::string(EXTENSION).size()) {
-                    std::error_code ec;
-                    std::filesystem::remove(entry, ec);
-                    if (ec) {
-                        MessageBox(nullptr, L"Couldn't delete one of the player files", L"Error", MB_OK | MB_ICONERROR);
-                    }
-                }
-            }
-        }
+    if (m_currentDungeon.GetGameWon()) 
+    {
+        DeleteAllPlayerSaves();
     }
-    else if (!CurrentDungeon.GetGameEnded()) {
+    else if (!m_currentDungeon.GetGameEnded()) 
+    {
         SavePlayerState();
-        CurrentDungeon.SaveMapToSave();
+        m_currentDungeon.SaveMapToSave();
     }
 }
 
 std::string GameEngine::GetPlayerName()
 {
-    return PlayerName;
+    return m_playerName;
 }
 
 void GameEngine::LoadLevel(int LevelNumber)
 {
-    std::string LevelName = PlayerName;
+    std::string LevelName = m_playerName;
     LevelName.append(std::to_string(LevelNumber));
     LevelName.append(EXTENSION);
 
-    int PreviousIndex = CurrentDungeon.LevelIndex;
+    int PreviousIndex = m_currentDungeon.LevelIndex;
 
-    PlayerCharacter = *CurrentDungeon.GetPlayer();
-    CurrentDungeon.RemovePlayer();
+    m_PlayerCharacter = *m_currentDungeon.GetPlayer();
+    m_currentDungeon.RemovePlayer();
+    m_currentDungeon.SaveMapToSave();
+    m_currentDungeon.LevelIndex = LevelNumber;
 
-    CurrentDungeon.SaveMapToSave();
-
-    CurrentDungeon.LevelIndex = LevelNumber;
-    if (!CurrentDungeon.LoadMapFromSave(LevelName)) {
-        CurrentDungeon.GenerateMap();
-        //MessageBox(nullptr, L"Failed to load save, aborting.", L"Error", MB_OK | MB_ICONERROR);
+    if (!m_currentDungeon.LoadMapFromSave(LevelName)) 
+    {
+        m_currentDungeon.GenerateMap();
     }
-    CurrentDungeon.SpawnPlayer(PreviousIndex < LevelNumber, &PlayerCharacter);
-    windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
-    windowContext->NewPlayerCoords(CurrentDungeon.GetPlayerPosition());
+    m_currentDungeon.SpawnPlayer(PreviousIndex < LevelNumber, &m_PlayerCharacter);
+    m_windowContext->NewTilesToDraw(m_currentDungeon.GatherTilesForRender());
+    m_windowContext->NewPlayerCoords(m_currentDungeon.GetPlayerPosition());
 
     SavePlayerState();
-    CurrentDungeon.SaveMapToSave();
+    m_currentDungeon.SaveMapToSave();
 }
 
 void GameEngine::RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback NewShowUseCallback, LoggerCallback NewLoggerCallback)
 {
-    
-    g_HoverCallback = NewHoverCallback;
-    g_ShowUseCallback = NewShowUseCallback;
-    g_LoggerCallback = NewLoggerCallback;
+    m_hoverCallback = NewHoverCallback;
+    m_showUseCallback = NewShowUseCallback;
+    m_loggerCallback = NewLoggerCallback;
     Position PlayerMove;
-    windowContext->windowUpdate();
-    HoverInfo Info = CurrentDungeon.ConstructHoverInfo(windowContext->GetCursorHoverPosition());
+    m_windowContext->WindowUpdate();
+    HoverInfo Info = m_currentDungeon.ConstructHoverInfo(m_windowContext->GetCursorHoverPosition());
 
-    if (g_HoverCallback) {
-        g_HoverCallback(Info.Name, Info.CurrentHP, Info.MaxHP);
+    if (m_hoverCallback) 
+    {
+        m_hoverCallback(Info.Name, Info.CurrentHp, Info.MaxHp);
     }
 
-    if (CurrentDungeon.GetGameEnded()) {
+    if (m_currentDungeon.GetGameEnded()) 
+    {
         return;
     }
 
     //try to consume use
-    if (bShouldUse) {
-        bShouldUse = false;
-        CurrentDungeon.UseCurrentObject();
-        windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
-        windowContext->windowUpdate();
-        if (g_ShowUseCallback) {
-            if (CurrentDungeon.IsUseAvailable()) {
-                g_ShowUseCallback(true);
+    if (m_bShouldUse) 
+    {
+        m_bShouldUse = false;
+        m_currentDungeon.UseCurrentObject();
+        m_windowContext->NewTilesToDraw(m_currentDungeon.GatherTilesForRender());
+        m_windowContext->WindowUpdate();
+        if (m_showUseCallback) 
+        {
+            if (m_currentDungeon.IsUseAvailable()) 
+            {
+                m_showUseCallback(true);
             }
-            else {
-                g_ShowUseCallback(false);
+            else 
+            {
+                m_showUseCallback(false);
             }
         }
     }
 
-    PlayerMove = windowContext->GetClickPosition();
-    if (PlayerMove.x == -1) return;
+    PlayerMove = m_windowContext->GetClickPosition();
+    if (PlayerMove.X == -1) return;
 
-    //handle action
-
-    if (CurrentDungeon.PerformAction(PlayerMove)) {
-        CurrentDungeon.PerformEntitiesTurn();
-        windowContext->newTilesToDraw(CurrentDungeon.GatherTilesForRender());
-        if (!CurrentDungeon.GetGameEnded()) {
-            windowContext->NewPlayerCoords(CurrentDungeon.GetPlayerPosition());
-            if (g_ShowUseCallback) {
-                if (CurrentDungeon.IsUseAvailable()) {
-                    g_ShowUseCallback(true);
+    //handle actions
+    if (m_currentDungeon.PerformAction(PlayerMove)) 
+    {
+        m_currentDungeon.PerformEntitiesTurn();
+        m_windowContext->NewTilesToDraw(m_currentDungeon.GatherTilesForRender());
+        if (!m_currentDungeon.GetGameEnded())
+        {
+            m_windowContext->NewPlayerCoords(m_currentDungeon.GetPlayerPosition());
+            if (m_showUseCallback) 
+            {
+                if (m_currentDungeon.IsUseAvailable()) 
+                {
+                    m_showUseCallback(true);
                 }
-                else {
-                    g_ShowUseCallback(false);
+                else 
+                {
+                    m_showUseCallback(false);
                 }
             }
         }
-        else {
-            windowContext->windowUpdate();
-            //delete all player saves
-            
-            for (const auto& entry : std::filesystem::directory_iterator(".")) {
-                if (entry.is_regular_file()) {
-                    std::string filename = entry.path().filename().string();
-                    if (filename.find(PlayerName) == 0 && filename.find(EXTENSION) == filename.size() - std::string(EXTENSION).size()) {
-                        std::error_code ec;
-                        std::filesystem::remove(entry, ec);
-                        if (ec) {
-                            MessageBox(nullptr, L"Couldn't delete one of the player files", L"Error", MB_OK | MB_ICONERROR);
-                        }
-                    }
-                }
-            }
+        else 
+        {
+            m_windowContext->WindowUpdate();
+            //Player died
+            DeleteAllPlayerSaves();
         }
     }
 }
 
 void GameEngine::TurnOnShouldUse()
 {
-    bShouldUse = true;
+    m_bShouldUse = true;
 }
 
 void GameEngine::AppendLogger(BSTR NewLog)
 {
-    if (g_LoggerCallback) {
-        g_LoggerCallback(NewLog);
+    if (m_loggerCallback) 
+    {
+        m_loggerCallback(NewLog);
     }
 }
 
-// Function to initialize game and pass the callback function
+//dll exposed functions
 extern "C" __declspec(dllexport) void InitializeGame(WindowHwndCallback WindowCallback)
 {
     GameEngine::GetInstance()->InitializeEngine(WindowCallback);

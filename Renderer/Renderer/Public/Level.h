@@ -9,33 +9,37 @@
 #include "Entity.h"
 
 
-struct Node {
-	Position pos;
-	double gCost; // Cost from start to current node
-	double hCost; // Heuristic (estimated) cost from current node to goal
-	Node* parent; // Parent node in the path
+struct Node 
+{
+	Position Pos;
+	double GCost; // Cost from start to current node
+	double HCost; // Heuristic (estimated) cost from current node to goal
+	Node* Parent; // Parent node in the path
 
-	Node(Position p, double g, double h, Node* par) : pos(p), gCost(g), hCost(h), parent(par) {}
+	Node(Position NewPosition, double NewGCost, double NewHCost, Node* NewParent) : Pos(NewPosition), GCost(NewGCost), HCost(NewHCost), Parent(NewParent) {}
 
-	double GetFCost() const {
-		return gCost + hCost;
+	double GetFCost() const 
+	{
+		return GCost + HCost;
 	}
 };
 
-struct Item {
+struct Item 
+{
 	ItemTypes Type = ItemTypes::Empty;
 	Position Location = Position();
 	int BonusHP = 0;
 	int BonusDamage = 0;
 	int BonusPermaHP = 0;
-	//list of buffs or sth
 
 	Item(ItemTypes NewType, Position NewPosition, int NewBonusHP, int NewBonusDamage, int NewBonusPermaHP) : Type(NewType), Location(NewPosition), BonusHP(NewBonusHP), BonusDamage(NewBonusDamage), BonusPermaHP(NewBonusPermaHP) { ; };
 	Item() = default;
 };
 
-inline BSTR ToString(ItemTypes Type) {
-	switch (Type) {
+inline BSTR ToString(ItemTypes Type) 
+{
+	switch (Type) 
+	{
 	case ItemTypes::HealingPotionItem:
 		return LOCALIZED_TEXT("healing_potion");
 	case ItemTypes::StrengthRuneItem:
@@ -47,23 +51,23 @@ inline BSTR ToString(ItemTypes Type) {
 	}
 }
 
-struct LevelTile {
+struct LevelTile 
+{
 	Position Coordinates;
 	Architecture Arch;
 	Entity* Entity = nullptr;
 	Item* CurrentItem = nullptr;
 };
 
-class DungeonLevel {
+class DungeonLevel 
+{
 public:
 	void RemovePlayer();
 	bool SaveMapToSave();
-	int LevelIndex;
 	void UseCurrentObject();
 	void SpawnPlayer(bool bFromUp, Entity* Player);
-	bool LoadMapFromSave(std::string& SaveName);
+	bool LoadMapFromSave(const std::string& SaveName);
 	void GenerateMap();
-
 	int GetDeclaredBoardSize();
 	std::vector<TileToDraw> GatherTilesForRender();
 	Position GetPlayerPosition();
@@ -71,27 +75,29 @@ public:
 	bool MoveEntity(Entity* EntityToMove);
 	Entity* GetPlayer();
 	Entity* GetEntityOnTile(Position Location);
-
 	std::vector<Position> GetPath(Position Start, Position Goal, bool bIgnoreAll = false);
 	void PerformEntitiesTurn();
 	bool GetGameEnded();
 	bool IsUseAvailable();
 	bool GetGameWon();
 	HoverInfo ConstructHoverInfo(Position HoverPosition);
+
+	int LevelIndex;
 private:
 	void UseItem(Item* UsedItem);
-	void PutInQueue(int PositionOffset, Entity* ent);
+	void PutInQueue(size_t PositionOffset, Entity* EntityToAdd);
 	void ConnectAreas(std::vector<std::vector<Position>>& Areas);
 	std::vector<Position> FindAllConnected(Position StartPos, std::vector<std::vector<LevelTile>>* NewMap);
-	bool bIsGameEnded = false;
 	void KillEntityOnPosition(Position Location, bool bUpdateQueue = true);
 	bool IsMoveLegal(Position PlayerMove);
-	std::vector<std::vector<LevelTile>> LevelMap;
-	std::vector<std::vector<Entity*>> MonsterQueue;
 
-	int DeclaredBoardSize = 0;
+	std::vector<std::vector<LevelTile>> m_levelMap;
+	std::vector<std::vector<Entity*>> m_monsterQueue;
 
-	bool bIsGameWon = false;
-	std::vector<Item*> ItemsOnLevel;
-	std::vector<Entity*> EntitiesOnLevel;
+	int m_declaredBoardSize = 0;
+
+	bool m_bIsGameWon = false;
+	bool m_bIsGameEnded = false;
+	std::vector<Item*> m_itemsOnLevel;
+	std::vector<Entity*> m_entitiesOnLevel;
 };

@@ -4,14 +4,14 @@
 #include"glew.h"
 #include"Renderer.h"
 
-// Struktura definiuj¹ca element bufora wierzcho³ków
-struct vertexBufferElement {
-	unsigned int type;
+struct VertexBufferElement 
+{
+	unsigned int Type;
+	unsigned int Count;
+	unsigned char Normalized;
 
-	unsigned int count;
-	unsigned char normalized;
-
-	static unsigned int getSizeOfType(unsigned int type) {
+	static unsigned int GetSizeOfType(unsigned int type) 
+	{
 		switch (type)
 		{
 		case GL_FLOAT:	return 4;
@@ -23,20 +23,21 @@ struct vertexBufferElement {
 	}
 };
 
-// Klasa definiuj¹ca uk³ad bufora wierzcho³ków
-class vertexBufferLayout {
+class VertexBufferLayout
+{
 private:
-	std::vector<vertexBufferElement> m_Elements;
-	unsigned int m_Stride; //odleg³oœæ pomiêdzy kolejnymi wierzcho³kami
+	std::vector<VertexBufferElement> m_elements;
+	unsigned int m_stride;
 public:
-	vertexBufferLayout()
-		: m_Stride(0) {}
+	VertexBufferLayout()
+		: m_stride(0) {}
 
-	void push(unsigned int count) {
-		m_Elements.push_back({ GL_FLOAT, count, GL_FALSE });
-		m_Stride += count * vertexBufferElement::getSizeOfType(GL_FLOAT);
+	void Push(unsigned int Count) 
+	{
+		m_elements.push_back({ GL_FLOAT, Count, GL_FALSE });
+		m_stride += Count * VertexBufferElement::GetSizeOfType(GL_FLOAT);
 	}
 
-	inline const std::vector<vertexBufferElement> getElements() const { return m_Elements; }
-	inline unsigned int getStride() const { return m_Stride; }
+	inline const std::vector<VertexBufferElement> GetElements() const { return m_elements; }
+	inline unsigned int GetStride() const { return m_stride; }
 };

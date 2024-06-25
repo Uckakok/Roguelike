@@ -3,26 +3,23 @@
 
 
 
-class Entity {
+class Entity 
+{
 private:
-	int HP;
-	int MaxHP;
-	int Damage;
-	bool bIsDead = false;
-	bool bIsPlayer = false;
-	int Speed;
+	int m_hp;
+	int m_maxHp;
+	int m_Damage;
+	bool m_bIsDead = false;
+	bool m_bIsPlayer = false;
+	int m_speed;
 public:
 	Entity() = default;
-	Entity(const Entity& NewEntity) : HP(NewEntity.HP), Damage(NewEntity.Damage), bIsDead(NewEntity.bIsDead), bIsPlayer(NewEntity.bIsPlayer), Location(NewEntity.Location), Type(NewEntity.Type), MaxHP(NewEntity.MaxHP), Speed(NewEntity.Speed) { ; };
+	Entity(const Entity& NewEntity);
+	Entity(EntityTypes NewType, Position NewPosition, int NewHP, int NewMaxHP, int NewDamage, int NewSpeed);
+
 	Position Location;
 	EntityTypes Type;
-	//stats but who cares
 
-	Entity(EntityTypes NewType, Position NewPosition, int NewHP, int NewMaxHP, int NewDamage, int NewSpeed) : Type(NewType), Location(NewPosition), HP(NewHP), MaxHP(NewMaxHP), Damage(NewDamage), Speed(NewSpeed) { 
-		if (NewType == EntityTypes::PlayerEntity) {
-			bIsPlayer = true;
-		}
-	};
 
 	void ReceiveDamage(int Damage);
 	bool IsDead();

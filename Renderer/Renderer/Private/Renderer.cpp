@@ -3,34 +3,36 @@
 #include<iostream>
 #include"pch.h"
 
-//usuwanie b³êdów openGL
-void GLClearError() {
-	for (int i = 0; i < GLAD_GET_ERROR_MAX; ++i) {
+void GLClearError() 
+{
+	for (int i = 0; i < GLAD_GET_ERROR_MAX; ++i)
+	{
 		while (glGetError() == GL_NO_ERROR)
 			break;;
 	}
 }
 
-//wypisuje wszystkie b³êdy openGL
-bool GLLogCall(const char* function, const char* file, int line) {
-	while (GLenum error = glGetError()) {
-		char errorMessage[512];
-			sprintf_s(errorMessage, "OpenGL error in file %s at line %d: %x", file, line, error);
-			MessageBoxA(NULL, errorMessage, "OpenGL Error", MB_OK | MB_ICONERROR);
-			return false;
+bool GLLogCall(const char* Function, const char* File, int Line) 
+{
+	while (GLenum Error = glGetError()) 
+	{
+		char ErrorMessage[512];
+		sprintf_s(ErrorMessage, "OpenGL error in file %s at line %d: %x", File, Line, Error);
+		MessageBoxA(NULL, ErrorMessage, "OpenGL Error", MB_OK | MB_ICONERROR);
+		return false;
 	}
 	return true;
 }
 
-void Renderer::clear() const {
+void Renderer::Clear() const 
+{
 	GLCall(glClear(GL_COLOR_BUFFER_BIT));
 }
 
-void Renderer::draw(const vertexArray& va, const indexBuffer& ib, const Shader& shader) const {
-	shader.bind();
-
-	va.bind();
-	ib.bind();
-
-	GLCall(glDrawElements(GL_TRIANGLES, ib.getCount(), GL_UNSIGNED_INT, nullptr));
+void Renderer::Draw(const VertexArray& Va, const IndexBuffer& Ib, const Shader& Shader) const
+{
+	Shader.Bind();
+	Va.Bind();
+	Ib.Bind();
+	GLCall(glDrawElements(GL_TRIANGLES, Ib.GetCount(), GL_UNSIGNED_INT, nullptr));
 }

@@ -2,17 +2,18 @@
 
 #include"VertexBuffer.h"
 
-class vertexBufferLayout;
+class VertexBufferLayout;
 
-class vertexArray {
+class VertexArray 
+{
 private:
-	unsigned int m_RendererID;
+	unsigned int m_rendererId;
 public:
-	vertexArray();
-	~vertexArray();
+	VertexArray();
+	~VertexArray();
 
-	void addBuffer(const vertexBuffer& vb, const vertexBufferLayout& layout);
+	void AddBuffer(const VertexBuffer& Vb, const VertexBufferLayout& Layout);
 
-	void bind() const;
-	void unbind() const;
+	void Bind() const;
+	void Unbind() const;
 };

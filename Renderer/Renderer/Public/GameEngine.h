@@ -7,17 +7,13 @@
 #include <string>
 
 
-//main window initialization.
+//callback functions
 typedef void(*WindowHwndCallback)(HWND);
-
-//hover info callback
 typedef void(*HoverInfoCallback)(BSTR Name, int CurrentHP, int MaxHP);
-
 typedef void(*ShowUseCallback)(bool bShow);
-
 typedef void(*LoggerCallback)(BSTR LogEvent);
 
-// Function prototypes
+//exposed dll functions
 extern "C" __declspec(dllexport) void InitializeGame(WindowHwndCallback);
 
 extern "C" __declspec(dllexport) void GameTick(HoverInfoCallback NewHoverCallback, ShowUseCallback NewShowUseCallback, LoggerCallback NewLoggerCallback);
@@ -31,37 +27,30 @@ extern "C" __declspec(dllexport) void ChangeLanguage(const char* Language);
 extern "C" __declspec(dllexport) void SavePostExit();
 
 
-class GameEngine {
+class GameEngine
+{
 private:
-
     GameEngine() = default;
 
-    bool bShouldUse;
+    bool m_bShouldUse;
+    std::string m_playerName = "test"; //name of saves
+    Entity m_PlayerCharacter; //data of player character
 
-    // Define a global variable to hold the callback function pointer
-    HoverInfoCallback g_HoverCallback = nullptr;
-    WindowHwndCallback g_WindowCallback = nullptr;
-    ShowUseCallback g_ShowUseCallback = nullptr;
-    LoggerCallback g_LoggerCallback = nullptr;
-    graphicalInterface* windowContext;
-    DungeonLevel CurrentDungeon;
+    //stored callbacks
+    HoverInfoCallback m_hoverCallback = nullptr;
+    WindowHwndCallback m_windowCallback = nullptr;
+    ShowUseCallback m_showUseCallback = nullptr;
+    LoggerCallback m_loggerCallback = nullptr;
+    GraphicalInterface* m_windowContext;
+    DungeonLevel m_currentDungeon;
+    static GameEngine* m_instance;
 
-    // Private destructor to prevent deletion
     ~GameEngine() = default;
-
-    // Private copy constructor to prevent copying
     GameEngine(const GameEngine&) = delete;
-
-    // Private assignment operator to prevent assignment
     GameEngine& operator=(const GameEngine&) = delete;
 
-    // Static instance of the class
-    static GameEngine* instance;
-    std::string PlayerName = "test";
-
-    Entity PlayerCharacter; //should be a different class, but works for now
-
     void SavePlayerState();
+    void DeleteAllPlayerSaves();
 
 public:
     void SavePostGame();

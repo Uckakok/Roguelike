@@ -1,58 +1,77 @@
 #include "pch.h"
 #include "Entity.h"
 
+
+Entity::Entity(EntityTypes NewType, Position NewPosition, int NewHP, int NewMaxHP, int NewDamage, int NewSpeed) 
+    : Type(NewType), Location(NewPosition), m_hp(NewHP), m_maxHp(NewMaxHP), m_Damage(NewDamage), m_speed(NewSpeed) 
+{
+    if (NewType == EntityTypes::PlayerEntity) 
+    {
+        m_bIsPlayer = true;
+    }
+};
+
+Entity::Entity(const Entity& NewEntity) : m_hp(NewEntity.m_hp), m_Damage(NewEntity.m_Damage),
+    m_bIsDead(NewEntity.m_bIsDead), m_bIsPlayer(NewEntity.m_bIsPlayer), Location(NewEntity.Location),
+    Type(NewEntity.Type), m_maxHp(NewEntity.m_maxHp), m_speed(NewEntity.m_speed)
+{
+    ;
+}
+
 void Entity::ReceiveDamage(int Damage)
 {
-    HP -= Damage;
-    if (HP <= 0) {
-        bIsDead = true;
+    m_hp -= Damage;
+    if (m_hp <= 0) 
+    {
+        m_bIsDead = true;
     }
 }
 
 bool Entity::IsDead()
 {
-    return bIsDead;
+    return m_bIsDead;
 }
 
 bool Entity::IsPlayer()
 {
-    return bIsPlayer;
+    return m_bIsPlayer;
 }
 
 int Entity::GetDamage()
 {
-    return Damage;
+    return m_Damage;
 }
 
 int Entity::GetHP()
 {
-    return HP;
+    return m_hp;
 }
 
 int Entity::GetMaxHP()
 {
-    return MaxHP;
+    return m_maxHp;
 }
 
 int Entity::GetSpeed()
 {
-    return Speed;
+    return m_speed;
 }
 
 void Entity::AddMaxHP(int Bonus)
 {
-    MaxHP += Bonus;
+    m_maxHp += Bonus;
 }
 
 void Entity::AddDamage(int Bonus)
 {
-    Damage += Bonus;
+    m_Damage += Bonus;
 }
 
 void Entity::Heal(int Bonus)
 {
-    HP += Bonus;
-    if (HP > MaxHP) {
-        HP = MaxHP;
+    m_hp += Bonus;
+    if (m_hp > m_maxHp) 
+    {
+        m_hp = m_maxHp;
     }
 }

@@ -4,37 +4,38 @@
 #include"VertexBufferLayout.h"
 #include"Renderer.h"
 
-vertexArray::vertexArray()
+VertexArray::VertexArray()
 {
-	GLCall(glGenVertexArrays(1, &m_RendererID));
+	GLCall(glGenVertexArrays(1, &m_rendererId));
 }
 
-vertexArray::~vertexArray()
+VertexArray::~VertexArray()
 {
-	GLCall(glDeleteVertexArrays(1, &m_RendererID));
+	GLCall(glDeleteVertexArrays(1, &m_rendererId));
 }
 
 // Metoda dodaj¹ca bufor wierzcho³ków do tablicy wierzcho³ków
-void vertexArray::addBuffer(const vertexBuffer& vb, const vertexBufferLayout& layout)
+void VertexArray::AddBuffer(const VertexBuffer& Vb, const VertexBufferLayout& Layout)
 {
-	bind();
-	vb.bind();
-	const auto& elements = layout.getElements();
-	unsigned int offset = 0;
-	for (unsigned int i = 0; i < elements.size(); ++i) {
-		const auto& element = elements[i];
+	Bind();
+	Vb.Bind();
+	const auto& Elements = Layout.GetElements();
+	unsigned int Offset = 0;
+	for (unsigned int i = 0; i < Elements.size(); ++i) 
+	{
+		const auto& Element = Elements[i];
 		GLCall(glEnableVertexAttribArray(i));
-		GLCall(glVertexAttribPointer(i, element.count, element.type, element.normalized, layout.getStride(), (const void*)offset));
-		offset += element.count * vertexBufferElement::getSizeOfType(element.type);
+		GLCall(glVertexAttribPointer(i, Element.Count, Element.Type, Element.Normalized, Layout.GetStride(), (const void*)Offset));
+		Offset += Element.Count * VertexBufferElement::GetSizeOfType(Element.Type);
 	}
 }
 
-void vertexArray::bind() const
+void VertexArray::Bind() const
 {
-	GLCall(glBindVertexArray(m_RendererID));
+	GLCall(glBindVertexArray(m_rendererId));
 }
 
-void vertexArray::unbind() const
+void VertexArray::Unbind() const
 {
 	GLCall(glBindVertexArray(0));
 }

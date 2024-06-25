@@ -1,29 +1,30 @@
 #pragma once
-#include<string>
-#include"Texture.h"
+#include <string>
+#include "Texture.h"
 #include <comutil.h>
 #include "LocalizationManager.h"
-#include<fstream>
+#include <fstream>
 
 #define LEVEL_SIZE	32
 #define TILE_MIDDLE	32
 #define EXTENSION	".Rog"
-#define MAX_LEVEL	50
 #define MONSTER_SPAWN_RANDOMIZER	6
 #define STRENGTH_DEPTH_MULTIPLIER	1
 #define HEALING_DEPTH_MULTIPLIER	8
 #define MAX_HP_DEPTH_MULTIPLIER		4
 
-#define MAX(x, y) x > y ? x : y;
+#define MAX(x, y) (x > y ? x : y);
 
-enum ItemTypes {
+enum ItemTypes 
+{
 	Empty,
 	HealingPotionItem,
 	VitalityRuneItem,
 	StrengthRuneItem,
 };
 
-enum Architecture {
+enum Architecture 
+{
 	FloorTile,
 	WallTile,
 	StairsDownTile,
@@ -36,7 +37,8 @@ enum Architecture {
 };
 
 
-enum EntityTypes {
+enum EntityTypes 
+{
 	None,
 	PlayerEntity,
 	GoblinEntity,
@@ -52,7 +54,8 @@ enum EntityTypes {
 	GnollEntity,
 };
 
-enum TileTypes {
+enum TileTypes 
+{
 	Floor,
 	Wall,
 	HealingPotion,
@@ -81,8 +84,10 @@ enum TileTypes {
 	Num
 };
 
-inline BSTR ToString(Architecture arch) {
-	switch (arch) {
+inline BSTR ToString(Architecture arch) 
+{
+	switch (arch) 
+	{
 	case Architecture::FloorTile:
 		return LOCALIZED_TEXT("floor");
 	case Architecture::WallTile:
@@ -104,8 +109,10 @@ inline BSTR ToString(Architecture arch) {
 	}
 }
 
-inline TileTypes ToTiletype(EntityTypes ent) {
-	switch (ent) {
+inline TileTypes ToTiletype(EntityTypes ent)
+{
+	switch (ent) 
+	{
 	case EntityTypes::PlayerEntity:
 		return TileTypes::Player;
 	case EntityTypes::GoblinEntity:
@@ -136,8 +143,10 @@ inline TileTypes ToTiletype(EntityTypes ent) {
 	}
 }
 
-inline TileTypes ToTileType(Architecture arch) {
-	switch (arch) {
+inline TileTypes ToTileType(Architecture arch) 
+{
+	switch (arch) 
+	{
 	case Architecture::FloorTile:
 		return TileTypes::Floor;
 	case Architecture::WallTile:
@@ -152,20 +161,27 @@ inline TileTypes ToTileType(Architecture arch) {
 	}
 }
 
-struct Sprite {
+struct Sprite
+{
 	TileTypes Type;
 	Texture* SpriteTexture;
+
 	Sprite() = default;
-	Sprite(TileTypes NewType) : Type(NewType) {
+	Sprite(TileTypes NewType) : Type(NewType) 
+	{
 		SpriteTexture = new Texture(GetPath());
-		SpriteTexture->bind();
+		SpriteTexture->Bind();
 	}
-	void Bind() {
-		SpriteTexture->bind();
+
+	void Bind() 
+	{
+		SpriteTexture->Bind();
 	}
+
 	std::string GetPath()
 	{
-		switch (Type) {
+		switch (Type) 
+		{
 		case TileTypes::Floor:
 			return "Resources/Textures/FloorTile.png";
 		case TileTypes::Wall:
@@ -207,43 +223,50 @@ struct Sprite {
 		case TileTypes::StairsUp:
 			return "Resources/Textures/StairsUp.png";
 		default:
-			//MessageBox(nullptr, L"Tried to load invalid sprite", L"Error", MB_OK | MB_ICONERROR);
 			return "";
 		}
 	}
 
 };
 
-struct TileToDraw {
-	int x;
-	int y;
+struct TileToDraw 
+{
+	int X;
+	int Y;
 	TileTypes Type;
 
 	TileToDraw() = default;
-	TileToDraw(int newx, int newy, TileTypes newType) : x(newx), y(newy), Type(newType) { ; };
+	TileToDraw(int NewX, int NewY, TileTypes NewType) : X(NewX), Y(NewY), Type(NewType) { ; };
 };
 
-struct Position {
-	int x;
-	int y;
+struct Position 
+{
+	int X;
+	int Y;
+
 	Position() = default;
-	Position(int NewX, int NewY) : x(NewX), y(NewY) { ; };
-	bool operator==(const Position& New) const {
-		return this->x == New.x && this->y == New.y;
+	Position(int NewX, int NewY) : X(NewX), Y(NewY) { ; };
+
+	bool operator==(const Position& New) const 
+	{
+		return this->X == New.X && this->Y == New.Y;
 	}
-	bool operator!=(const Position& New) const {
-		return this->x != New.x || this->y != New.y;
+
+	bool operator!=(const Position& New) const 
+	{
+		return this->X != New.X || this->Y != New.Y;
 	}
 };
 
 
 
-struct HoverInfo {
+struct HoverInfo 
+{
 	BSTR Name;
-	int CurrentHP;
-	int MaxHP;
+	int CurrentHp;
+	int MaxHp;
 
-	HoverInfo(BSTR NewName, int NewCurrentHP, int NewMaxHP) : CurrentHP(NewCurrentHP), MaxHP(NewMaxHP), Name(NewName) { ; };
+	HoverInfo(BSTR NewName, int NewCurrentHP, int NewMaxHP) : CurrentHp(NewCurrentHP), MaxHp(NewMaxHP), Name(NewName) { ; };
 };
 
 

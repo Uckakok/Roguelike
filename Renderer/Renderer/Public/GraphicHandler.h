@@ -12,54 +12,50 @@
 #include"Renderer.h"
 
 
-class graphicalInterface {
+class GraphicalInterface 
+{
 private:
-	void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-	float squareVertex[16] = {
+	void MouseButtonCallback(GLFWwindow* Window, int Button, int Action, int Mods);
+	float m_squareVertex[16] = {
 		-50.0f, -50.0f, 0.0f, 0.0f,
 		 50.0f, -50.0f, 1.0f, 0.0f,
 		 50.0f,  50.0f, 1.0f, 1.0f,
 		-50.0f,  50.0f, 0.0f, 1.0f
 	};
-	unsigned int squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-	GLFWwindow* window;
-	GLuint vao;
-	vertexArray* va;
-	vertexBuffer* vb;
-	indexBuffer* ib;
-	vertexBufferLayout layout;
-	Shader* shader;
+	unsigned int m_squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
+	GLFWwindow* m_window;
+	GLuint m_vao;
+	VertexArray* m_va;
+	VertexBuffer* m_vb;
+	IndexBuffer* m_ib;
+	VertexBufferLayout m_layout;
+	Shader* m_shader;
 	
-	std::unordered_map<TileTypes, Sprite> Sprites;
+	std::unordered_map<TileTypes, Sprite> m_sprites;
 
-	Texture* background;
-	Renderer renderer;
-	glm::vec3* translationA;
-	glm::vec3* translationB;
-	glm::vec3* scaleA;
-	glm::vec3* scaleB;
-	glm::mat4 proj;
-	std::vector<TileToDraw> Tiles;
-	Position PlayerPosition;
-	Position ClickCoordinates = Position(-1, -1);
+	Texture* m_background;
+	Renderer m_renderer;
+	glm::vec3* m_translationA;
+	glm::vec3* m_translationB;
+	glm::vec3* m_scaleA;
+	glm::vec3* m_scaleB;
+	glm::mat4 m_proj;
+	std::vector<TileToDraw> m_tiles;
+	Position m_playerPosition;
+	Position m_clickCoordinates = Position(-1, -1);
 public:
-	static void mouse_button_callback_wrapper(GLFWwindow* window, int button, int action, int mods) {
-		graphicalInterface* instance = static_cast<graphicalInterface*>(glfwGetWindowUserPointer(window));
-		if (instance) {
-			instance->mouse_button_callback(window, button, action, mods);
-		}
-	}
-	graphicalInterface();
+	static void MouseButtonCallbackWrapper(GLFWwindow* Window, int Button, int Action, int Mods);
+	GraphicalInterface();
 	void MakeContextCurrent();
-	void blendEnable() const;
-	void prepareVertexArray();
-	void prepareVertexBuffer();
-	void prepareShaders();
-	void unbindStuff() const;
-	void setupCallbacks() const;
-	void setupMatrices();
-	void windowUpdate();
-	void newTilesToDraw(const std::vector<TileToDraw>& newTiles);
+	void EnableBlending() const;
+	void PrepareVertexArray();
+	void PrepareVertexBuffer();
+	void PrepareShaders();
+	void UnbindObjects() const;
+	void SetupCallbacks() const;
+	void SetupMatrices();
+	void WindowUpdate();
+	void NewTilesToDraw(const std::vector<TileToDraw>& NewTiles);
 	void NewPlayerCoords(Position NewPosition);
 	GLFWwindow* GetWindow();
 	Position GetClickPosition();

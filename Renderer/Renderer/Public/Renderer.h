@@ -6,17 +6,18 @@
 
 #define GLAD_GET_ERROR_MAX 25
 #define ASSERT(x) if (!(x)) __debugbreak();
-//#ifdef DEBUG
+#ifdef DEBUG
 #define GLCall(x) GLClearError(); x; ASSERT(GLLogCall(#x, __FILE__, __LINE__))
-//#else
-//#define GLCall(x) x
-//#endif
+#else
+#define GLCall(x) x
+#endif
 
 void GLClearError();
-bool GLLogCall(const char* function, const char* file, int line);
+bool GLLogCall(const char* Function, const char* File, int Line);
 
-class Renderer {
+class Renderer 
+{
 public:
-	void clear() const;
-	void draw(const vertexArray& va, const indexBuffer& ib, const Shader& shader) const;
+	void Clear() const;
+	void Draw(const VertexArray& Va, const IndexBuffer& Ib, const Shader& DrawingShader) const;
 };

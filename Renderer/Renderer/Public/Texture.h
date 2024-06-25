@@ -2,19 +2,18 @@
 
 #include"Renderer.h"
 
-class Texture {
+class Texture 
+{
 private:
-	unsigned int m_RendererID;
-	std::string m_FilePath;
-	unsigned char* m_LocalBuffer;
-	int m_Width, m_Height, m_BPP;
+	unsigned int m_rendererId;
+	std::string m_filePath;
+	unsigned char* m_localBuffer;
+	int m_width, m_height, m_BPP;
 public:
-	Texture(const std::string& path);
+	Texture(const std::string& Path);
 	~Texture();
-
-	void bind(unsigned int slot = 0) const;
-	void unbind() const;
-
-	inline int getWidth() const { return m_Width; };
-	inline int getHeight() const { return m_Height; };
+	void Bind(unsigned int Slot = 0) const;
+	void Unbind() const;
+	inline int GetWidth() const { return m_width; };
+	inline int GetHeight() const { return m_height; };
 };

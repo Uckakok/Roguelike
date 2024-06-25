@@ -11,21 +11,29 @@
 #include<cmath>
 
 
-const float disBetweenSquares = 50;
+const float g_disBetweenSquares = 50;
 
-//funkcja wywo�ywana przy klikni�ciu myszk�
-void graphicalInterface::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+void GraphicalInterface::MouseButtonCallback(GLFWwindow* Window, int Button, int Action, int Mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	if (Button == GLFW_MOUSE_BUTTON_LEFT && Action == GLFW_PRESS)
 	{
-		ClickCoordinates = GetCursorHoverPosition();
+		m_clickCoordinates = GetCursorHoverPosition();
 	}
 }
 
+void GraphicalInterface::MouseButtonCallbackWrapper(GLFWwindow* Window, int Button, int Action, int Mods) 
+{
+	GraphicalInterface* Instance = static_cast<GraphicalInterface*>(glfwGetWindowUserPointer(Window));
+	if (Instance) 
+	{
+		Instance->MouseButtonCallback(Window, Button, Action, Mods);
+	}
+}
 
-graphicalInterface::graphicalInterface() :va(NULL), ib(NULL) {
-
-	if (!glfwInit()) {
+GraphicalInterface::GraphicalInterface() :m_va(NULL), m_ib(NULL) 
+{
+	if (!glfwInit()) 
+	{
 		MessageBox(NULL, L"Can't open the window. Critical error", L"Error", MB_OK | MB_ICONERROR);
 		__debugbreak();
 		return;
@@ -34,8 +42,8 @@ graphicalInterface::graphicalInterface() :va(NULL), ib(NULL) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	window = glfwCreateWindow(640, 480, "Roguelike", NULL, NULL);
-	if (!window)
+	m_window = glfwCreateWindow(640, 480, "Roguelike", NULL, NULL);
+	if (!m_window)
 	{
 		MessageBox(NULL, L"Can't open the window. Critical error", L"Error", MB_OK | MB_ICONERROR);
 		glfwTerminate();
@@ -45,13 +53,14 @@ graphicalInterface::graphicalInterface() :va(NULL), ib(NULL) {
 	
 }
 
-void graphicalInterface::MakeContextCurrent()
+void GraphicalInterface::MakeContextCurrent()
 {
-	GLCall(glfwMakeContextCurrent(window));
+	GLCall(glfwMakeContextCurrent(m_window));
 
 	glfwSwapInterval(1);
 
-	if (glewInit() != GLEW_OK) {
+	if (glewInit() != GLEW_OK) 
+	{
 		MessageBox(NULL, L"Can't open the window. Critical error", L"Error", MB_OK | MB_ICONERROR);
 		glfwTerminate();
 		__debugbreak();
@@ -59,128 +68,125 @@ void graphicalInterface::MakeContextCurrent()
 	}
 }
 
-//blendowanie kana�u alfa
-void graphicalInterface::blendEnable() const
+void GraphicalInterface::EnableBlending() const
 {
 	GLCall(glEnable(GL_BLEND));
 	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 }
 
-void graphicalInterface::prepareVertexArray()
+void GraphicalInterface::PrepareVertexArray()
 {
-	GLCall(glGenVertexArrays(1, &vao));
-	GLCall(glBindVertexArray(vao));
+	GLCall(glGenVertexArrays(1, &m_vao));
+	GLCall(glBindVertexArray(m_vao));
 }
 
-void graphicalInterface::prepareVertexBuffer() {
-	vb = new vertexBuffer(squareVertex, 4 * 4 * sizeof(float));
-	layout.push(2);
-	layout.push(2);
-	va = new vertexArray();
-	va->addBuffer(*vb, layout);
-	ib = new indexBuffer(squareIndices, 6);
+void GraphicalInterface::PrepareVertexBuffer() 
+{
+	m_vb = new VertexBuffer(m_squareVertex, 4 * 4 * sizeof(float));
+	m_layout.Push(2);
+	m_layout.Push(2);
+	m_va = new VertexArray();
+	m_va->AddBuffer(*m_vb, m_layout);
+	m_ib = new IndexBuffer(m_squareIndices, 6);
 }
 
-//tworzy shader i �aduje grafiki
-void graphicalInterface::prepareShaders()
+void GraphicalInterface::PrepareShaders()
 {
-	shader = new Shader("Resources/Shaders/basic.shader");
-	shader->bind();
-	shader->setUniform1i("u_Texture", 0);
-	background = new Texture("Resources/Textures/Background.png");
-	background->bind();
+	m_shader = new Shader("Resources/Shaders/basic.shader");
+	m_shader->Bind();
+	m_shader->SetUniform1i("u_Texture", 0);
+	m_background = new Texture("Resources/Textures/Background.png");
+	m_background->Bind();
 	
-	for (int i = 0; i < static_cast<int>(TileTypes::Num); ++i) {
-		Sprites.emplace(static_cast<TileTypes>(i), Sprite(static_cast<TileTypes>(i)));
+	for (int i = 0; i < static_cast<int>(TileTypes::Num); ++i) 
+	{
+		m_sprites.emplace(static_cast<TileTypes>(i), Sprite(static_cast<TileTypes>(i)));
 	}
 }
 
-void graphicalInterface::unbindStuff() const
+void GraphicalInterface::UnbindObjects() const
 {
 	GLCall(glBindVertexArray(0));
-	va->unbind();
-	shader->unbind();
-	vb->unbind();
-	ib->unbind();
+	m_va->Unbind();
+	m_shader->Unbind();
+	m_vb->Unbind();
+	m_ib->Unbind();
 }
 
-void graphicalInterface::setupCallbacks() const
+void GraphicalInterface::SetupCallbacks() const
 {
-	glfwSetWindowUserPointer(window, const_cast<graphicalInterface*>(this));
-	glfwSetMouseButtonCallback(window, mouse_button_callback_wrapper);
+	glfwSetWindowUserPointer(m_window, const_cast<GraphicalInterface*>(this));
+	glfwSetMouseButtonCallback(m_window, MouseButtonCallbackWrapper);
 }
 
-//wektory do przesuwania, rzutowania i skalowania obiekt�w
-void graphicalInterface::setupMatrices()
+void GraphicalInterface::SetupMatrices()
 {
-	translationA = new glm::vec3(320/7, 240/5.2, 0);
-	translationB = new glm::vec3(100, 100, 0);
-	scaleA = new glm::vec3(7, 5.2, 0);
-	scaleB = new glm::vec3(0.5f, 0.5f, 0);
-	proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);
+	m_translationA = new glm::vec3(320/7, 240/5.2, 0);
+	m_translationB = new glm::vec3(100, 100, 0);
+	m_scaleA = new glm::vec3(7, 5.2, 0);
+	m_scaleB = new glm::vec3(0.5f, 0.5f, 0);
+	m_proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);
 }
 
-void graphicalInterface::windowUpdate()
+void GraphicalInterface::WindowUpdate()
 {
-	renderer.clear();
+	m_renderer.Clear();
 
-	shader->bind();
+	m_shader->Bind();
 	{
-		background->bind();
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), (const glm::vec3)*translationA);
-		glm::mat4 scale = glm::scale(glm::mat4(1.0f), (const glm::vec3)*scaleA);
-		glm::mat4 mvp = proj * scale * model;
-		shader->setUniformMat4f("u_MVP", mvp);
-		renderer.draw(*va, *ib, *shader);
+		m_background->Bind();
+		glm::mat4 Model = glm::translate(glm::mat4(1.0f), (const glm::vec3)*m_translationA);
+		glm::mat4 Scale = glm::scale(glm::mat4(1.0f), (const glm::vec3)*m_scaleA);
+		glm::mat4 Mvp = m_proj * Scale * Model;
+		m_shader->SetUniformMat4f("u_MVP", Mvp);
+		m_renderer.Draw(*m_va, *m_ib, *m_shader);
 	}
-	for (auto& tile : Tiles) {
-		//todo: batch rendering for efficiency
-
-		Sprites[tile.Type].Bind();
-		float x = (tile.x - PlayerPosition.x + 5) * disBetweenSquares + TILE_MIDDLE;
-		float y = (tile.y - PlayerPosition.y + 6) * disBetweenSquares + TILE_MIDDLE;
-		translationB = new glm::vec3(y * 2, (480 - x) * 2, 0);
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), (const glm::vec3)*translationB);
-		glm::mat4 scale = glm::scale(glm::mat4(1.0f), (const glm::vec3)*scaleB);
-		glm::mat4 mvp = proj * scale * model;
-		shader->setUniformMat4f("u_MVP", mvp);
-		renderer.draw(*va, *ib, *shader); 
-		delete translationB;
+	for (auto& MapTile : m_tiles) 
+	{
+		m_sprites[MapTile.Type].Bind();
+		float X = (MapTile.X - m_playerPosition.X + 5) * g_disBetweenSquares + TILE_MIDDLE;
+		float Y = (MapTile.Y - m_playerPosition.Y + 6) * g_disBetweenSquares + TILE_MIDDLE;
+		m_translationB = new glm::vec3(Y * 2, (480 - X) * 2, 0);
+		glm::mat4 Model = glm::translate(glm::mat4(1.0f), (const glm::vec3)*m_translationB);
+		glm::mat4 Scale = glm::scale(glm::mat4(1.0f), (const glm::vec3)*m_scaleB);
+		glm::mat4 Mvp = m_proj * Scale * Model;
+		m_shader->SetUniformMat4f("u_MVP", Mvp);
+		m_renderer.Draw(*m_va, *m_ib, *m_shader); 
+		delete m_translationB;
 	}
 
-	GLCall(glfwSwapBuffers(window));
+	GLCall(glfwSwapBuffers(m_window));
 	GLCall(glfwPollEvents());
-
 }
 
-void graphicalInterface::newTilesToDraw(const std::vector<TileToDraw>& newTiles)
+void GraphicalInterface::NewTilesToDraw(const std::vector<TileToDraw>& NewTiles)
 {
-	Tiles = newTiles;
+	m_tiles = NewTiles;
 }
 
-void graphicalInterface::NewPlayerCoords(Position NewPosition)
+void GraphicalInterface::NewPlayerCoords(Position NewPosition)
 {
-	PlayerPosition = NewPosition;
+	m_playerPosition = NewPosition;
 }
 
-GLFWwindow* graphicalInterface::GetWindow()
+GLFWwindow* GraphicalInterface::GetWindow()
 {
-	return window;
+	return m_window;
 }
 
-Position graphicalInterface::GetClickPosition()
+Position GraphicalInterface::GetClickPosition()
 {
-	Position temp = ClickCoordinates;
-	ClickCoordinates = Position(-1, -1);
-	return temp;
+	Position Temp = m_clickCoordinates;
+	m_clickCoordinates = Position(-1, -1);
+	return Temp;
 }
 
-Position graphicalInterface::GetCursorHoverPosition()
+Position GraphicalInterface::GetCursorHoverPosition()
 {
-	double xpos, ypos;
-	glfwGetCursorPos(window, &xpos, &ypos);
+	double XPos, YPos;
+	glfwGetCursorPos(m_window, &XPos, &YPos);
 	Position InGameCursorPos;
-	InGameCursorPos = Position((int)round((ypos - TILE_MIDDLE) / disBetweenSquares) - 5 + PlayerPosition.x, (int)round((xpos - TILE_MIDDLE) / disBetweenSquares) - 6 + PlayerPosition.y);
+	InGameCursorPos = Position((int)round((YPos - TILE_MIDDLE) / g_disBetweenSquares) - 5 + m_playerPosition.X, (int)round((XPos - TILE_MIDDLE) / g_disBetweenSquares) - 6 + m_playerPosition.Y);
 
 	return InGameCursorPos;
 }

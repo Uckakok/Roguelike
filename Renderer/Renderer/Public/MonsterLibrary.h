@@ -2,10 +2,10 @@
 #include "Defines.h"
 
 #define MONSTERFILE "Resources/monsters.mon"
-
 #define GETMONSTERKEY(x) MonsterManager::GetInstance()->GetData(x).LocalizationKey
 
-struct MonsterData {
+struct MonsterData 
+{
     EntityTypes Type;
     std::string LocalizationKey;
     int Damage;
@@ -14,24 +14,21 @@ struct MonsterData {
     int Speed;
 };
 
-inline Entity ToEntity(MonsterData Mon) {
+inline Entity ToEntity(MonsterData Mon) 
+{
     return Entity(Mon.Type, Position(), Mon.MaxHP, Mon.MaxHP, Mon.Damage, Mon.Speed);
 }
 
 class MonsterManager
 {
 private:
-    std::unordered_map<int, MonsterData> MonsterLibrary;
     MonsterManager() = default;
     ~MonsterManager() = default;
-
     MonsterManager(const MonsterManager&) = delete;
-
-    // Private assignment operator to prevent assignment
     MonsterManager& operator=(const MonsterManager&) = delete;
 
-    // Static instance of the class
-    static MonsterManager* instance;
+    std::unordered_map<int, MonsterData> m_monsterLibrary;
+    static MonsterManager* m_instance;
 
 public:
     void ReadMonsterDataFromFile();
