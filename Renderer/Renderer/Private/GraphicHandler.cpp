@@ -169,7 +169,7 @@ void GraphicalInterface::NewPlayerCoords(Position NewPosition)
 	m_playerPosition = NewPosition;
 }
 
-GLFWwindow* GraphicalInterface::GetWindow()
+GLFWwindow* GraphicalInterface::GetWindow() const
 {
 	return m_window;
 }

@@ -68,28 +68,28 @@ public:
 	void SpawnPlayer(bool bFromUp, Entity* Player);
 	bool LoadMapFromSave(const std::string& SaveName);
 	void GenerateMap();
-	int GetDeclaredBoardSize();
-	std::vector<TileToDraw> GatherTilesForRender();
-	Position GetPlayerPosition();
+	int GetDeclaredBoardSize() const;
+	[[nodiscard]] std::vector<TileToDraw> GatherTilesForRender();
+	Position GetPlayerPosition() const;
 	bool PerformAction(Position PlayerMove);
 	bool MoveEntity(Entity* EntityToMove);
-	Entity* GetPlayer();
-	Entity* GetEntityOnTile(Position Location);
-	std::vector<Position> GetPath(Position Start, Position Goal, bool bIgnoreAll = false);
+	Entity* GetPlayer() const;
+	Entity* GetEntityOnTile(Position Location) const;
+	[[nodiscard]] std::vector<Position> GetPath(Position Start, Position Goal, bool bIgnoreAll = false) const;
 	void PerformEntitiesTurn();
-	bool GetGameEnded();
-	bool IsUseAvailable();
-	bool GetGameWon();
-	HoverInfo ConstructHoverInfo(Position HoverPosition);
+	bool GetGameEnded() const;
+	bool IsUseAvailable() const;
+	bool GetGameWon() const;
+	[[nodiscard]] HoverInfo ConstructHoverInfo(Position HoverPosition) const;
 
 	int LevelIndex;
 private:
 	void UseItem(Item* UsedItem);
 	void PutInQueue(size_t PositionOffset, Entity* EntityToAdd);
 	void ConnectAreas(std::vector<std::vector<Position>>& Areas);
-	std::vector<Position> FindAllConnected(Position StartPos, std::vector<std::vector<LevelTile>>* NewMap);
+	[[nodiscard]] std::vector<Position> FindAllConnected(Position StartPos, std::vector<std::vector<LevelTile>>* NewMap);
 	void KillEntityOnPosition(Position Location, bool bUpdateQueue = true);
-	bool IsMoveLegal(Position PlayerMove);
+	bool IsMoveLegal(Position PlayerMove) const;
 
 	std::vector<std::vector<LevelTile>> m_levelMap;
 	std::vector<std::vector<Entity*>> m_monsterQueue;
@@ -98,6 +98,6 @@ private:
 
 	bool m_bIsGameWon = false;
 	bool m_bIsGameEnded = false;
-	std::vector<Item*> m_itemsOnLevel;
-	std::vector<Entity*> m_entitiesOnLevel;
+	std::vector<std::unique_ptr<Item>> m_itemsOnLevel;
+	std::vector<std::unique_ptr<Entity>> m_entitiesOnLevel;
 };

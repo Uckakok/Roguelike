@@ -50,7 +50,7 @@ MonsterManager* MonsterManager::GetInstance()
     return m_instance;
 }
 
-Entity MonsterManager::GetMonster(EntityTypes Key)
+Entity MonsterManager::GetMonster(EntityTypes Key) const
 {
     auto Iterator = m_monsterLibrary.find(Key);
     if (Iterator != m_monsterLibrary.end())
@@ -64,7 +64,7 @@ Entity MonsterManager::GetMonster(EntityTypes Key)
     }
 }
 
-MonsterData MonsterManager::GetData(EntityTypes Key)
+MonsterData MonsterManager::GetData(EntityTypes Key) const
 {
     auto Iterator = m_monsterLibrary.find(Key);
     if (Iterator != m_monsterLibrary.end())

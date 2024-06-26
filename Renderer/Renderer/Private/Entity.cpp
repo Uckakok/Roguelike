@@ -27,32 +27,32 @@ void Entity::ReceiveDamage(int Damage)
     }
 }
 
-bool Entity::IsDead()
+bool Entity::IsDead() const
 {
     return m_bIsDead;
 }
 
-bool Entity::IsPlayer()
+bool Entity::IsPlayer() const
 {
     return m_bIsPlayer;
 }
 
-int Entity::GetDamage()
+int Entity::GetDamage() const
 {
     return m_Damage;
 }
 
-int Entity::GetHP()
+int Entity::GetHP() const
 {
     return m_hp;
 }
 
-int Entity::GetMaxHP()
+int Entity::GetMaxHP() const
 {
     return m_maxHp;
 }
 
-int Entity::GetSpeed()
+int Entity::GetSpeed() const
 {
     return m_speed;
 }

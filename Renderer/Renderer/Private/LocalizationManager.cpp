@@ -45,7 +45,7 @@ void LocalizationManager::LoadAllLocalizedStrings()
     File.close();
 }
 
-BSTR LocalizationManager::GetLocalizedString(std::string Key)
+BSTR LocalizationManager::GetLocalizedString(std::string Key) const
 {
     auto Iterator = m_localizedStringCache.find(Key);
     if (Iterator != m_localizedStringCache.end()) 
@@ -75,7 +75,7 @@ LocalizationManager* LocalizationManager::GetInstance()
     return m_instance;
 }
 
-BSTR LocalizationManager::format(std::wstring Main, ...)
+BSTR LocalizationManager::Format(std::wstring Main, ...) const
 {
     va_list Args;
     va_start(Args, Main);
@@ -88,7 +88,7 @@ BSTR LocalizationManager::format(std::wstring Main, ...)
     return SysAllocString(&Buffer[0]);
 }
 
-std::wstring LocalizationManager::ConvertStringToWideChar(const std::string& str) 
+std::wstring LocalizationManager::ConvertStringToWideChar(const std::string& str) const
 {
     int Length = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
     std::wstring WideString(Length, 0);

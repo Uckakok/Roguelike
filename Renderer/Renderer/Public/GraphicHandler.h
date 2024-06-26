@@ -57,7 +57,7 @@ public:
 	void WindowUpdate();
 	void NewTilesToDraw(const std::vector<TileToDraw>& NewTiles);
 	void NewPlayerCoords(Position NewPosition);
-	GLFWwindow* GetWindow();
-	Position GetClickPosition();
+	GLFWwindow* GetWindow() const;
+	[[nodiscard]] Position GetClickPosition();
 	Position GetCursorHoverPosition();
 };

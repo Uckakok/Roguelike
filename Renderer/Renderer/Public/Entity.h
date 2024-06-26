@@ -22,12 +22,12 @@ public:
 
 
 	void ReceiveDamage(int Damage);
-	bool IsDead();
-	bool IsPlayer();
-	int GetDamage();
-	int GetHP();
-	int GetMaxHP();
-	int GetSpeed();
+	bool IsDead() const;
+	bool IsPlayer() const;
+	int GetDamage() const;
+	int GetHP() const;
+	int GetMaxHP() const;
+	int GetSpeed() const;
 	void AddMaxHP(int Bonus);
 	void AddDamage(int Bonus);
 	void Heal(int Bonus);

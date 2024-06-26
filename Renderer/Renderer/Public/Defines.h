@@ -178,7 +178,7 @@ struct Sprite
 		SpriteTexture->Bind();
 	}
 
-	std::string GetPath()
+	[[nodiscard]] std::string GetPath() const
 	{
 		switch (Type) 
 		{

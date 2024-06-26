@@ -49,17 +49,17 @@ private:
     GameEngine(const GameEngine&) = delete;
     GameEngine& operator=(const GameEngine&) = delete;
 
-    void SavePlayerState();
-    void DeleteAllPlayerSaves();
+    void SavePlayerState() const;
+    void DeleteAllPlayerSaves() const;
 
 public:
     void SavePostGame();
-    std::string GetPlayerName();
+    std::string GetPlayerName() const;
     void LoadLevel(int LevelNumber);
     static GameEngine* GetInstance();
     void InitializeEngine(WindowHwndCallback WindowCallback);
     void PrepareMap();
     void RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback NewShowUseCallback, LoggerCallback NewLoggerCallback);
     void TurnOnShouldUse();
-    void AppendLogger(BSTR NewLog);
+    void AppendLogger(BSTR NewLog) const;
 };

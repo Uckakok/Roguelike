@@ -9,7 +9,7 @@
 
 #define LOCALIZED_TEXT(key) LocalizationManager::GetInstance()->GetLocalizedString(key)
 #define LOCALIZED_WSTRING(key) std::wstring(LocalizationManager::GetInstance()->GetLocalizedString(key))
-#define FORMAT(Main, ...) LocalizationManager::GetInstance()->format(Main, __VA_ARGS__)
+#define FORMAT(Main, ...) LocalizationManager::GetInstance()->Format(Main, __VA_ARGS__)
 
 
 class LocalizationManager
@@ -20,7 +20,7 @@ private:
     LocalizationManager(const LocalizationManager&) = delete;
     LocalizationManager& operator=(const LocalizationManager&) = delete;
 
-    std::wstring ConvertStringToWideChar(const std::string& str);
+    std::wstring ConvertStringToWideChar(const std::string& str) const;
 
     static LocalizationManager* m_instance;
     std::unordered_map<std::string, BSTR> m_localizedStringCache;
@@ -28,7 +28,7 @@ private:
 public:
     void ChangeLanguage(std::string NewLanguage);
     void LoadAllLocalizedStrings();
-    BSTR GetLocalizedString(std::string Key);
+    BSTR GetLocalizedString(std::string Key) const;
     static LocalizationManager* GetInstance();
-    BSTR format(std::wstring Main, ...);
+    BSTR Format(std::wstring Main, ...) const;
 };

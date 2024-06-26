@@ -105,7 +105,7 @@ void GameEngine::PrepareMap()
     m_windowContext->NewPlayerCoords(m_currentDungeon.GetPlayerPosition());
 }
 
-void GameEngine::SavePlayerState()
+void GameEngine::SavePlayerState() const
 {
     std::string SaveName = m_playerName;
     SaveName.append(EXTENSION);
@@ -122,7 +122,7 @@ void GameEngine::SavePlayerState()
     File.close();
 }
 
-void GameEngine::DeleteAllPlayerSaves()
+void GameEngine::DeleteAllPlayerSaves() const
 {
     for (const auto& Entry : std::filesystem::directory_iterator("."))
     {
@@ -156,7 +156,7 @@ void GameEngine::SavePostGame()
     }
 }
 
-std::string GameEngine::GetPlayerName()
+std::string GameEngine::GetPlayerName() const
 {
     return m_playerName;
 }
@@ -262,7 +262,7 @@ void GameEngine::TurnOnShouldUse()
     m_bShouldUse = true;
 }
 
-void GameEngine::AppendLogger(BSTR NewLog)
+void GameEngine::AppendLogger(BSTR NewLog) const
 {
     if (m_loggerCallback) 
     {

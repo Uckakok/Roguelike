@@ -33,7 +33,7 @@ private:
 public:
     void ReadMonsterDataFromFile();
     static MonsterManager* GetInstance();
-    Entity GetMonster(EntityTypes Key);
-    MonsterData GetData(EntityTypes Key);
+    Entity GetMonster(EntityTypes Key) const;
+    MonsterData GetData(EntityTypes Key) const;
     MonsterData GetRandMonsterData();
 };
