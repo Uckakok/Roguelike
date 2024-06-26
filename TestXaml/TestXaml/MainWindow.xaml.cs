@@ -14,46 +14,32 @@ namespace TestXaml
         private readonly HoverCallback HoverCallbackDelegate;
         private readonly ShowUseCallback ShowUseCallbackDelegate;
         private readonly LoggerCallback LoggerCallbackDelegate;
+        private TimerCallback TimerCallbackDelegate;
 
         private IntPtr OtherWindow;
         private IntPtr ThisWindow;
 
-        [DllImport("winmm.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
-        static extern uint timeSetEvent(uint uDelay, uint uResolution, TimerCallback lpTimeProc, IntPtr dwUser, uint fuEvent);
-
-        [DllImport("winmm.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
-        static extern uint timeKillEvent(uint uTimerID);
-
-        private delegate void TimerCallback(uint uTimerID, uint uMsg, ref IntPtr dwUser, ref IntPtr dw1, ref IntPtr dw2);
-
         private const uint TimerResolution = 1;
-
-        // 16 ms for 60 FPS
+        //16 ms for 60 FPS
         private const uint TimerInterval = 16;
-
         private uint TimerId;
-
-        private TimerCallback TimerCallbackDelegate;
-
-        public delegate void HoverCallback([MarshalAs(UnmanagedType.BStr)] string Name, int CurrentHP, int MaxHP);
-
-        public delegate void LoggerCallback([MarshalAs(UnmanagedType.BStr)] string Name);
-
-        public delegate void WindowHandleCallback(IntPtr windowHandle);
-
-        public delegate void ShowUseCallback(bool bShow);
-
         bool bShouldUse = false;
         private bool bIsGameTickRunning = false;
-
         private int FrameCount = 0;
         private DateTime LastCheckTime = DateTime.Now;
         private int Fps = 0;
 
+
+        private delegate void TimerCallback(uint uTimerID, uint uMsg, ref IntPtr dwUser, ref IntPtr dw1, ref IntPtr dw2);
+        public delegate void HoverCallback([MarshalAs(UnmanagedType.BStr)] string Name, int CurrentHP, int MaxHP);
+        public delegate void LoggerCallback([MarshalAs(UnmanagedType.BStr)] string Name);
+        public delegate void WindowHandleCallback(IntPtr windowHandle);
+        public delegate void ShowUseCallback(bool bShow);
+
+
         public MainWindow()
         {
             InitializeComponent();
-
 
             HoverCallbackDelegate = new HoverCallback(HoverCallbackFunction);
             ShowUseCallbackDelegate = new ShowUseCallback(ShowUseCallbackFunction);
@@ -78,7 +64,7 @@ namespace TestXaml
                     string language = Path.GetFileNameWithoutExtension(poFile);
                     if (language == "en")
                     {
-                        AddLanguage(language, true); // Set as default selection
+                        AddLanguage(language, true); //set as default selection
                     }
                     else
                     {
@@ -110,7 +96,7 @@ namespace TestXaml
 
             TimerCallbackDelegate = TimerCallbackFunction;
 
-            // Create the multimedia timer
+            //create the multimedia timer
             TimerId = timeSetEvent(TimerInterval, TimerResolution, TimerCallbackDelegate, IntPtr.Zero, 1);
             if (TimerId == 0)
             {
@@ -124,7 +110,7 @@ namespace TestXaml
             if (!bIsGameTickRunning)
             {
                 bIsGameTickRunning = true;
-                // Call the GameTick function
+                //call the GameTick function
                 Dispatcher.Invoke(() =>
                 {
                     if (bShouldUse)
@@ -203,7 +189,7 @@ namespace TestXaml
             string translationKey = "use_text";
             IntPtr translationPtr = GetTranslation(translationKey);
 
-            // Convert the IntPtr to a managed string directly
+            //convert the IntPtr to a managed string
             string translation = Marshal.PtrToStringBSTR(translationPtr);
             Marshal.FreeBSTR(translationPtr);
 
@@ -239,22 +225,6 @@ namespace TestXaml
             });
         }
 
-        // Import native methods
-        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void SavePostExit();
-        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void UseActivated();
-        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void InitializeGame(IntPtr windowHandleCallback);
-
-        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void GameTick(IntPtr hoverCallback, IntPtr useCallback, IntPtr loggerCallback);
-        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr GetTranslation(string Key);
-        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void ChangeLanguage(string Language);
-
-        // Callback method to receive the window handle from native code
         private void WindowCallback(IntPtr windowHandle)
         {
             OtherWindow = windowHandle;
@@ -268,18 +238,36 @@ namespace TestXaml
 
         private void ArrangeWindows()
         {
-            //Moves the otherWindow on top of childPlaceHolder
+            //moves the otherWindow on top of childPlaceHolder
             Point topLeft = childPlaceholder.TransformToAncestor(this).Transform(new Point(0, 0));
             Point bottomRight = childPlaceholder.TransformToAncestor(this).Transform(new Point(childPlaceholder.ActualWidth, childPlaceholder.ActualHeight));
             WinHelper.MoveWindow(OtherWindow, (int)topLeft.X, (int)topLeft.Y, (int)bottomRight.X - (int)topLeft.X, (int)bottomRight.Y - (int)topLeft.Y, true);
 
             WinHelper.SendWindowToBack(OtherWindow);
         }
+
+        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void SavePostExit();
+        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void UseActivated();
+        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void InitializeGame(IntPtr windowHandleCallback);
+
+        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void GameTick(IntPtr hoverCallback, IntPtr useCallback, IntPtr loggerCallback);
+        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr GetTranslation(string Key);
+        [DllImport("Renderer.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void ChangeLanguage(string Language);
+        [DllImport("winmm.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
+        static extern uint timeSetEvent(uint uDelay, uint uResolution, TimerCallback lpTimeProc, IntPtr dwUser, uint fuEvent);
+        [DllImport("winmm.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
+        static extern uint timeKillEvent(uint uTimerID);
     }
 
     class WinHelper
     {
-        //Sets a window to be a child window of another window
+        //sets a window to be a child window of another window
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
@@ -290,7 +278,7 @@ namespace TestXaml
         [DllImport("user32.dll")]
         public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
-        //Sets window attributes
+        //sets window attributes
         [DllImport("user32.dll")]
         public static extern int SetWindowLong(IntPtr hWnd, int nIndex, winStyle dwNewLong);
 
@@ -298,7 +286,7 @@ namespace TestXaml
 
         public static void SendWindowToBack(IntPtr windowHandle)
         {
-            // Call SetWindowPos to send the window to the bottom of the Z-order
+            //call SetWindowPos to send the window to the bottom of the Z-order
             SetWindowPos(windowHandle, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
         }
 
