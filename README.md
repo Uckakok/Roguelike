@@ -36,7 +36,7 @@ This repository contains the documentation and source code for an university Rog
 
 ### Used Libraries
 
-The project utilizes additional libraries with licenses provided in the "Licenses" directory.
+The project utilizes additional libraries with licenses provided in the [TestXaml/TestXaml/Licenses](https://github.com/Uckakok/Roguelike/tree/main/TestXaml/TestXaml/Licenses) directory.
 
 ### Disclaimer
 
