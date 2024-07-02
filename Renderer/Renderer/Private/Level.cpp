@@ -899,7 +899,7 @@ bool DungeonLevel::GetGameWon() const
 
 HoverInfo DungeonLevel::ConstructHoverInfo(Position HoverPosition) const
 {
-    if (HoverPosition.X < 0 || HoverPosition.Y >= static_cast<int>(m_levelMap.size()) ||
+    if (HoverPosition.X < 0 || HoverPosition.X >= static_cast<int>(m_levelMap.size()) ||
         HoverPosition.Y < 0 || HoverPosition.Y >= static_cast<int>(m_levelMap[0].size())) 
     {
         return HoverInfo(LOCALIZED_TEXT("out_of_bounds"), 0, 0);
@@ -924,35 +924,33 @@ HoverInfo DungeonLevel::ConstructHoverInfo(Position HoverPosition) const
 
 void DungeonLevel::KillEntityOnPosition(Position Location, bool bUpdateQueue)
 {
+    //remove this entity from queue
+    if (bUpdateQueue)
+    {
+        for (auto& Turn : m_monsterQueue)
+        {
+            for (auto Iterator = Turn.begin(); Iterator != Turn.end();)
+            {
+                if ((*Iterator)->Location == Location)
+                {
+                    Iterator = Turn.erase(Iterator);
+                }
+                else
+                {
+                    ++Iterator;
+                }
+            }
+        }
+    }
+
     m_levelMap[Location.X][Location.Y].Entity = nullptr;
 
-    for (auto Iterator = m_entitiesOnLevel.begin(); Iterator != m_entitiesOnLevel.end(); ++Iterator) 
+    for (auto Iterator = m_entitiesOnLevel.begin(); Iterator != m_entitiesOnLevel.end(); ++Iterator)
     {
         if ((*Iterator)->Location == Location)
         {
             m_entitiesOnLevel.erase(Iterator);
             break;
-        }
-    }
-
-    //remove this entity from queue
-    if (!bUpdateQueue) 
-    {
-        return;
-    }
-    for (auto& Turn : m_monsterQueue) 
-    {
-        for (auto Iterator = Turn.begin(); Iterator != Turn.end();) 
-        {
-            if ((*Iterator)->Location == Location) 
-            {
-                Iterator = Turn.erase(Iterator);
-                return;
-            }
-            else 
-            {
-                ++Iterator;
-            }
         }
     }
 }
