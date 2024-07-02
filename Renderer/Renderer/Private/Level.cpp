@@ -902,7 +902,7 @@ HoverInfo DungeonLevel::ConstructHoverInfo(Position HoverPosition) const
     if (HoverPosition.X < 0 || HoverPosition.X >= static_cast<int>(m_levelMap.size()) ||
         HoverPosition.Y < 0 || HoverPosition.Y >= static_cast<int>(m_levelMap[0].size())) 
     {
-        return HoverInfo(LOCALIZED_TEXT("out_of_bounds"), 0, 0);
+        return HoverInfo(LOCALIZED_TEXT("out_of_bounds"), 0, 1);
     }
 
     if (m_levelMap[HoverPosition.X][HoverPosition.Y].Entity) 
