@@ -234,13 +234,11 @@ void DungeonLevel::UseItem(Item* UsedItem)
     //set the item pointer in the LevelMap to nullptr
     m_levelMap[UsedItem->Location.X][UsedItem->Location.Y].CurrentItem = nullptr;
 
-    //erase the entity from the EntitiesOnLevel vector
-    for (auto Iterator = m_itemsOnLevel.begin(); Iterator != m_itemsOnLevel.end(); ++Iterator) 
+    for (size_t i = 0; i < m_itemsOnLevel.size(); ++i)
     {
-        if ((*Iterator)->Location == UsedItem->Location) 
+        if (m_itemsOnLevel[i]->Location == UsedItem->Location)
         {
-            m_itemsOnLevel.erase(Iterator);
-            delete UsedItem;
+            m_itemsOnLevel.erase(m_itemsOnLevel.begin() + i);
             break;
         }
     }
@@ -902,7 +900,7 @@ bool DungeonLevel::GetGameWon() const
 HoverInfo DungeonLevel::ConstructHoverInfo(Position HoverPosition) const
 {
     if (HoverPosition.X < 0 || HoverPosition.Y >= static_cast<int>(m_levelMap.size()) ||
-        HoverPosition.X < 0 || HoverPosition.Y >= static_cast<int>(m_levelMap[0].size())) 
+        HoverPosition.Y < 0 || HoverPosition.Y >= static_cast<int>(m_levelMap[0].size())) 
     {
         return HoverInfo(LOCALIZED_TEXT("out_of_bounds"), 0, 0);
     }
@@ -948,8 +946,8 @@ void DungeonLevel::KillEntityOnPosition(Position Location, bool bUpdateQueue)
         {
             if ((*Iterator)->Location == Location) 
             {
-                delete* Iterator;
                 Iterator = Turn.erase(Iterator); //update iterator after erasing
+                return;
             }
             else 
             {
