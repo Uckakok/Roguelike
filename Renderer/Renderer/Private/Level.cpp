@@ -946,7 +946,7 @@ void DungeonLevel::KillEntityOnPosition(Position Location, bool bUpdateQueue)
         {
             if ((*Iterator)->Location == Location) 
             {
-                Iterator = Turn.erase(Iterator); //update iterator after erasing
+                Iterator = Turn.erase(Iterator);
                 return;
             }
             else 

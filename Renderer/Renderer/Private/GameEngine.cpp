@@ -86,20 +86,32 @@ void GameEngine::PrepareMap()
 
     if (!m_currentDungeon.LoadMapFromSave(LevelName)) 
     {
-        MessageBox(nullptr, L"Failed to load save, aborting.", L"Error", MB_OK | MB_ICONERROR);
-        return;
+        MessageBox(nullptr, L"Failed to load save. Regenerating level and player", L"Error", MB_OK | MB_ICONERROR);
+        size_t DigitPosition = LevelName.find_first_of("0123456789");
+        if (DigitPosition != std::string::npos)
+        {
+            std::string LevelNumberString = LevelName.substr(DigitPosition);
+            int LevelNumber = std::stoi(LevelNumberString);
+            m_currentDungeon.LevelIndex = LevelNumber;
+        }
+        m_currentDungeon.GenerateMap();
+        auto TemporaryPlayer = MonsterManager::GetInstance()->GetMonster(EntityTypes::PlayerEntity);
+        m_currentDungeon.SpawnPlayer(true, &TemporaryPlayer);
     }
-    size_t DigitPosition = LevelName.find_first_of("0123456789");
-    if (DigitPosition != std::string::npos) 
+    else
     {
-        std::string LevelNumberString = LevelName.substr(DigitPosition);
-        int LevelNumber = std::stoi(LevelNumberString);
-        m_currentDungeon.LevelIndex = LevelNumber;
-    }
-    else 
-    {
-        MessageBox(nullptr, L"No level number found in the file name. Aborting", L"Error", MB_OK | MB_ICONERROR);
-        return;
+        size_t DigitPosition = LevelName.find_first_of("0123456789");
+        if (DigitPosition != std::string::npos)
+        {
+            std::string LevelNumberString = LevelName.substr(DigitPosition);
+            int LevelNumber = std::stoi(LevelNumberString);
+            m_currentDungeon.LevelIndex = LevelNumber;
+        }
+        else
+        {
+            MessageBox(nullptr, L"No level number found in the file name. Aborting", L"Error", MB_OK | MB_ICONERROR);
+            return;
+        }
     }
     m_windowContext->NewTilesToDraw(m_currentDungeon.GatherTilesForRender());
     m_windowContext->NewPlayerCoords(m_currentDungeon.GetPlayerPosition());
