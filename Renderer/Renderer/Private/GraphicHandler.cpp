@@ -42,7 +42,7 @@ GraphicalInterface::GraphicalInterface() :m_va(NULL), m_ib(NULL)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	m_window = glfwCreateWindow(640, 480, "Roguelike", NULL, NULL);
+	m_window = glfwCreateWindow(m_viewportWidth, m_viewportHeight, "Roguelike", NULL, NULL);
 	if (!m_window)
 	{
 		MessageBox(NULL, L"Can't open the window. Critical error", L"Error", MB_OK | MB_ICONERROR);
@@ -136,9 +136,14 @@ void GraphicalInterface::SetupMatrices()
 
 void GraphicalInterface::DrawTile(TileToDraw NewTile)
 {
-	m_sprites[NewTile.Type].Bind();
 	float X = (NewTile.X - m_playerPosition.X + 5) * g_disBetweenSquares + TILE_MIDDLE;
 	float Y = (NewTile.Y - m_playerPosition.Y + 6) * g_disBetweenSquares + TILE_MIDDLE;
+
+	if (X < -TILE_MIDDLE || X > m_viewportHeight + TILE_MIDDLE || Y < -TILE_MIDDLE || Y > m_viewportWidth + TILE_MIDDLE) {
+		return; //tile outside viewport. Don't waste resources
+	}
+
+	m_sprites[NewTile.Type].Bind();
 	m_translationB = new glm::vec3(Y * 2, (480 - X) * 2, 0);
 	glm::mat4 Model = glm::translate(glm::mat4(1.0f), (const glm::vec3)*m_translationB);
 	glm::mat4 Scale = glm::scale(glm::mat4(1.0f), (const glm::vec3)*m_scaleB);

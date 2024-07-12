@@ -35,6 +35,9 @@ private:
 	
 	std::unordered_map<TileTypes, Sprite> m_sprites;
 
+	const int m_viewportWidth = 640;
+	const int m_viewportHeight = 480;
+
 	Texture* m_background;
 	Renderer m_renderer;
 	glm::vec3* m_translationA;
