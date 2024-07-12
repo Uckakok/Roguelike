@@ -10,6 +10,7 @@
 #include "Defines.h"
 #include <unordered_map>
 #include"Renderer.h"
+#include "Sprite.h"
 
 
 class GraphicalInterface 

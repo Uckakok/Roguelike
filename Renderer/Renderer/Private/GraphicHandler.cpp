@@ -98,9 +98,15 @@ void GraphicalInterface::PrepareShaders()
 	m_background = new Texture("Resources/Textures/Background.png");
 	m_background->Bind();
 	
-	for (int i = 0; i < static_cast<int>(TileTypes::Num); ++i) 
+	//load architecture and other
+	for (int i = 0; i < static_cast<int>(TileTypes::Player); ++i) 
 	{
 		m_sprites.emplace(static_cast<TileTypes>(i), Sprite(static_cast<TileTypes>(i)));
+	}
+	//load monsters
+	for (int i = 1; i < static_cast<int>(EntityTypes::Num); ++i)
+	{
+		m_sprites.emplace(static_cast<TileTypes>(static_cast<int>(TileTypes::Player) + i - 1), Sprite(static_cast<EntityTypes>(i)));
 	}
 }
 

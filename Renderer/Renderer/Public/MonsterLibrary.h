@@ -8,6 +8,7 @@ struct MonsterData
 {
     EntityTypes Type;
     std::string LocalizationKey;
+    std::string TexturePath;
     int Damage;
     int MaxHP;
     int Weight;

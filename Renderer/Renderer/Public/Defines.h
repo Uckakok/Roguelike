@@ -37,7 +37,7 @@ enum Architecture
 };
 
 
-enum EntityTypes 
+enum class EntityTypes 
 {
 	None,
 	PlayerEntity,
@@ -52,12 +52,16 @@ enum EntityTypes
 	ImpEntity,
 	SkeletonEntity,
 	GnollEntity,
+	Num
 };
 
-enum TileTypes 
+enum class TileTypes 
 {
 	Floor,
 	Wall,
+	Highlight,
+	StairsDown,
+	StairsUp,
 	HealingPotion,
 	VitalityRune,
 	StrengthRune,
@@ -73,13 +77,6 @@ enum TileTypes
 	Imp,
 	Skeleton,
 	Gnoll,
-	Highlight,
-	StairsDown,
-	StairsUp,
-	StairsEarth,
-	StairsWater,
-	StairsAir,
-	StairsFire,
 
 	Num
 };
@@ -160,74 +157,6 @@ inline TileTypes ToTileType(Architecture arch)
 		return TileTypes::Floor;
 	}
 }
-
-struct Sprite
-{
-	TileTypes Type;
-	Texture* SpriteTexture;
-
-	Sprite() = default;
-	Sprite(TileTypes NewType) : Type(NewType) 
-	{
-		SpriteTexture = new Texture(GetPath());
-		SpriteTexture->Bind();
-	}
-
-	void Bind() 
-	{
-		SpriteTexture->Bind();
-	}
-
-	[[nodiscard]] std::string GetPath() const
-	{
-		switch (Type) 
-		{
-		case TileTypes::Floor:
-			return "Resources/Textures/FloorTile.png";
-		case TileTypes::Wall:
-			return "Resources/Textures/WallTile.png";
-		case TileTypes::Player:
-			return "Resources/Textures/PlayerSprite.png";
-		case TileTypes::HealingPotion:
-			return "Resources/Textures/HealingPotion.png";
-		case TileTypes::VitalityRune:
-			return "Resources/Textures/VitalityRune.png";
-		case TileTypes::StrengthRune:
-			return "Resources/Textures/StrengthRune.png";
-		case TileTypes::Goblin:
-			return "Resources/Textures/GoblinSprite.png";
-		case TileTypes::Orc:
-			return "Resources/Textures/OrcSprite.png";
-		case TileTypes::Drake:
-			return "Resources/Textures/DrakeSprite.png";
-		case TileTypes::Griffin:
-			return "Resources/Textures/GriffinSprite.png";
-		case TileTypes::Angel:
-			return "Resources/Textures/AngelSprite.png";
-		case TileTypes::Dwarf:
-			return "Resources/Textures/DwarfSprite.png";
-		case TileTypes::Dendroid:
-			return "Resources/Textures/DendroidSprite.png";
-		case TileTypes::GoldenDragon:
-			return "Resources/Textures/GoldenDragonSprite.png";
-		case TileTypes::Imp:
-			return "Resources/Textures/ImpSprite.png";
-		case TileTypes::Skeleton:
-			return "Resources/Textures/SkeletonSprite.png";
-		case TileTypes::Gnoll:
-			return "Resources/Textures/GnollSprite.png";
-		case TileTypes::Highlight:
-			return "Resources/Textures/Highlight.png";
-		case TileTypes::StairsDown:
-			return "Resources/Textures/StairsDown.png";
-		case TileTypes::StairsUp:
-			return "Resources/Textures/StairsUp.png";
-		default:
-			return "";
-		}
-	}
-
-};
 
 struct TileToDraw 
 {

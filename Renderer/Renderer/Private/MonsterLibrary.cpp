@@ -26,15 +26,15 @@ void MonsterManager::ReadMonsterDataFromFile()
         std::istringstream Iss(Line);
 
         int Type;
-        if (!(Iss >> Type >> NewMonsterEntry.LocalizationKey >> NewMonsterEntry.Damage >> NewMonsterEntry.MaxHP >> NewMonsterEntry.Speed >> NewMonsterEntry.Weight))
+        if (!(Iss >> Type >> NewMonsterEntry.LocalizationKey >> NewMonsterEntry.TexturePath >> NewMonsterEntry.Damage >> NewMonsterEntry.MaxHP >> NewMonsterEntry.Speed >> NewMonsterEntry.Weight))
         {
-            MessageBox(nullptr, L"Incorrectly formatten monsters.mon file", L"Error", MB_OK | MB_ICONERROR);
+            MessageBox(nullptr, L"Incorrectly formatted monsters.mon file", L"Error", MB_OK | MB_ICONERROR);
             continue;
         }
         Count++;
         NewMonsterEntry.Type = static_cast<EntityTypes>(Type);
 
-        m_monsterLibrary.emplace(NewMonsterEntry.Type, NewMonsterEntry);
+        m_monsterLibrary.emplace(static_cast<int>(NewMonsterEntry.Type), NewMonsterEntry);
     }
 
     File.close();
@@ -52,7 +52,7 @@ MonsterManager* MonsterManager::GetInstance()
 
 Entity MonsterManager::GetMonster(EntityTypes Key) const
 {
-    auto Iterator = m_monsterLibrary.find(Key);
+    auto Iterator = m_monsterLibrary.find(static_cast<int>(Key));
     if (Iterator != m_monsterLibrary.end())
     {
         return ToEntity(Iterator->second);
@@ -66,7 +66,7 @@ Entity MonsterManager::GetMonster(EntityTypes Key) const
 
 MonsterData MonsterManager::GetData(EntityTypes Key) const
 {
-    auto Iterator = m_monsterLibrary.find(Key);
+    auto Iterator = m_monsterLibrary.find(static_cast<int>(Key));
     if (Iterator != m_monsterLibrary.end())
     {
         return Iterator->second;

@@ -45,6 +45,8 @@ void GameEngine::InitializeEngine(WindowHwndCallback WindowCallback)
 
 void GameEngine::PrepareMap()
 {
+    LocalizationManager::GetInstance()->LoadAllLocalizedStrings();
+    MonsterManager::GetInstance()->ReadMonsterDataFromFile();
     m_windowContext->EnableBlending();
     m_windowContext->PrepareVertexArray();
     m_windowContext->PrepareVertexBuffer();
@@ -52,8 +54,6 @@ void GameEngine::PrepareMap()
     m_windowContext->UnbindObjects();
     m_windowContext->SetupCallbacks();
     m_windowContext->SetupMatrices();
-    LocalizationManager::GetInstance()->LoadAllLocalizedStrings();
-    MonsterManager::GetInstance()->ReadMonsterDataFromFile();
 
     std::string LevelName;
 

@@ -1,12 +1,12 @@
-1 player_entity 10 100 5 0 
-2 goblin_entity 4 25 5 3
-3 orc_entity 9 40 6 5
-4 drake_entity 50 550 3 60
-5 griffin_entity 30 250 2 30
-6 angel_entity 100 1400 2 120
-7 dwarf_entity 15 160 8 20
-8 dendroid_entity 20 600 10 40
-9 golden_dragon_entity 250 10000 2 300
-10 imp_entity 3 20 4 3
-11 skeleton_entity 6 15 5 5
-12 gnoll_entity 8 50 6 8
+1 player_entity PlayerSprite.png  10 100 5 0 
+2 goblin_entity GoblinSprite.png 4 25 5 3
+3 orc_entity OrcSprite.png 9 40 6 5
+4 drake_entity DrakeSprite.png 50 550 3 60
+5 griffin_entity GriffinSprite.png 30 250 2 30
+6 angel_entity AngelSprite.png 100 1400 2 120
+7 dwarf_entity DwarfSprite.png 15 160 8 20
+8 dendroid_entity DendroidSprite.png 20 600 10 40
+9 golden_dragon_entity GoldenDragonSprite.png 250 10000 2 300
+10 imp_entity ImpSprite.png 3 20 4 3
+11 skeleton_entity SkeletonSprite.png 6 15 5 5
+12 gnoll_entity GnollSprite.png 8 50 6 8
