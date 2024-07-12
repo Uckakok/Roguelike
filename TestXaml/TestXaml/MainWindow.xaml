@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:TestXaml"
         Title="Roguelike" Height="620" Width="800"
+        ResizeMode="CanMinimize"
         Loaded="Window_Loaded">
     <Window.Background>
         <ImageBrush ImageSource="pack://application:,,,/Background.jpg"/>
