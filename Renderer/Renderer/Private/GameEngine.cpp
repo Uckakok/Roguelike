@@ -76,6 +76,7 @@ void GameEngine::PrepareMap()
         m_PlayerCharacter = Entity(MonsterManager::GetInstance()->GetMonster(EntityTypes::PlayerEntity));
         m_currentDungeon.SpawnPlayer(true, &m_PlayerCharacter);
         m_windowContext->NewTilesToDraw(m_currentDungeon.GatherTilesForRender());
+        m_windowContext->NewEntitiesToDraw(m_currentDungeon.GatherEntitiesForRender());
         m_windowContext->NewPlayerCoords(m_currentDungeon.GetPlayerPosition());
         return;
     }
@@ -114,6 +115,7 @@ void GameEngine::PrepareMap()
         }
     }
     m_windowContext->NewTilesToDraw(m_currentDungeon.GatherTilesForRender());
+    m_windowContext->NewEntitiesToDraw(m_currentDungeon.GatherEntitiesForRender());
     m_windowContext->NewPlayerCoords(m_currentDungeon.GetPlayerPosition());
 }
 
@@ -192,6 +194,7 @@ void GameEngine::LoadLevel(int LevelNumber)
     }
     m_currentDungeon.SpawnPlayer(PreviousIndex < LevelNumber, &m_PlayerCharacter);
     m_windowContext->NewTilesToDraw(m_currentDungeon.GatherTilesForRender());
+    m_windowContext->NewEntitiesToDraw(m_currentDungeon.GatherEntitiesForRender());
     m_windowContext->NewPlayerCoords(m_currentDungeon.GetPlayerPosition());
 
     SavePlayerState();
@@ -222,7 +225,7 @@ void GameEngine::RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback New
     {
         m_bShouldUse = false;
         m_currentDungeon.UseCurrentObject();
-        m_windowContext->NewTilesToDraw(m_currentDungeon.GatherTilesForRender());
+        m_windowContext->NewEntitiesToDraw(m_currentDungeon.GatherEntitiesForRender());
         m_windowContext->WindowUpdate();
         if (m_showUseCallback) 
         {
@@ -244,7 +247,7 @@ void GameEngine::RunTick(HoverInfoCallback NewHoverCallback, ShowUseCallback New
     if (m_currentDungeon.PerformAction(PlayerMove)) 
     {
         m_currentDungeon.PerformEntitiesTurn();
-        m_windowContext->NewTilesToDraw(m_currentDungeon.GatherTilesForRender());
+        m_windowContext->NewEntitiesToDraw(m_currentDungeon.GatherEntitiesForRender());
         if (!m_currentDungeon.GetGameEnded())
         {
             m_windowContext->NewPlayerCoords(m_currentDungeon.GetPlayerPosition());

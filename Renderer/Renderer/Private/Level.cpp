@@ -555,6 +555,13 @@ std::vector<TileToDraw> DungeonLevel::GatherTilesForRender()
         }
     }
 
+    return GatheredTiles;
+}
+
+std::vector<TileToDraw> DungeonLevel::GatherEntitiesForRender()
+{
+    std::vector<TileToDraw> GatheredTiles;
+
     for (auto& Element : m_itemsOnLevel)
     {
         if (Element->Type == ItemTypes::Empty)
@@ -564,12 +571,12 @@ std::vector<TileToDraw> DungeonLevel::GatherTilesForRender()
         if (Element->Type == ItemTypes::HealingPotionItem)
         {
             GatheredTiles.push_back(TileToDraw(Element->Location.X, Element->Location.Y, TileTypes::HealingPotion));
-        }                                          
-        if (Element->Type == ItemTypes::VitalityRuneItem) 
+        }
+        if (Element->Type == ItemTypes::VitalityRuneItem)
         {
             GatheredTiles.push_back(TileToDraw(Element->Location.X, Element->Location.Y, TileTypes::VitalityRune));
-        }                                          
-        if (Element->Type == ItemTypes::StrengthRuneItem) 
+        }
+        if (Element->Type == ItemTypes::StrengthRuneItem)
         {
             GatheredTiles.push_back(TileToDraw(Element->Location.X, Element->Location.Y, TileTypes::StrengthRune));
         }
@@ -577,7 +584,7 @@ std::vector<TileToDraw> DungeonLevel::GatherTilesForRender()
 
     for (auto& EntityOnLevel : m_entitiesOnLevel)
     {
-        if (EntityOnLevel->Type == EntityTypes::None) 
+        if (EntityOnLevel->Type == EntityTypes::None)
         {
             MessageBox(nullptr, L"Invalid entity present on level", L"Error", MB_OK | MB_ICONERROR);
             continue;
@@ -592,9 +599,9 @@ std::vector<TileToDraw> DungeonLevel::GatherTilesForRender()
 
     //add highlighted tiles around the player
     const int Radius = 1;
-    for (int DX = -Radius; DX <= Radius; ++DX) 
+    for (int DX = -Radius; DX <= Radius; ++DX)
     {
-        for (int DY = -Radius; DY <= Radius; ++DY) 
+        for (int DY = -Radius; DY <= Radius; ++DY)
         {
             int NX = PlayerPos.X + DX;
             int NY = PlayerPos.Y + DY;

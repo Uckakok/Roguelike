@@ -70,6 +70,7 @@ public:
 	void GenerateMap();
 	int GetDeclaredBoardSize() const;
 	[[nodiscard]] std::vector<TileToDraw> GatherTilesForRender();
+	[[nodiscard]] std::vector<TileToDraw> GatherEntitiesForRender();
 	Position GetPlayerPosition() const;
 	bool PerformAction(Position PlayerMove);
 	bool MoveEntity(Entity* EntityToMove);

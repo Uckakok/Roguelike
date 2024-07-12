@@ -17,6 +17,7 @@ class GraphicalInterface
 {
 private:
 	void MouseButtonCallback(GLFWwindow* Window, int Button, int Action, int Mods);
+	void DrawTile(TileToDraw NewTile);
 	float m_squareVertex[16] = {
 		-50.0f, -50.0f, 0.0f, 0.0f,
 		 50.0f, -50.0f, 1.0f, 0.0f,
@@ -41,6 +42,7 @@ private:
 	glm::vec3* m_scaleA;
 	glm::vec3* m_scaleB;
 	glm::mat4 m_proj;
+	std::vector<TileToDraw> m_entitiesToDraw;
 	std::vector<TileToDraw> m_tiles;
 	Position m_playerPosition;
 	Position m_clickCoordinates = Position(-1, -1);
@@ -56,6 +58,7 @@ public:
 	void SetupCallbacks() const;
 	void SetupMatrices();
 	void WindowUpdate();
+	void NewEntitiesToDraw(const std::vector<TileToDraw>& NewEntities);
 	void NewTilesToDraw(const std::vector<TileToDraw>& NewTiles);
 	void NewPlayerCoords(Position NewPosition);
 	GLFWwindow* GetWindow() const;

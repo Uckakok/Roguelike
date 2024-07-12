@@ -134,6 +134,20 @@ void GraphicalInterface::SetupMatrices()
 	m_proj = glm::ortho(0.0f, 640.0f, 0.0f, 480.0f, -1.0f, 1.0f);
 }
 
+void GraphicalInterface::DrawTile(TileToDraw NewTile)
+{
+	m_sprites[NewTile.Type].Bind();
+	float X = (NewTile.X - m_playerPosition.X + 5) * g_disBetweenSquares + TILE_MIDDLE;
+	float Y = (NewTile.Y - m_playerPosition.Y + 6) * g_disBetweenSquares + TILE_MIDDLE;
+	m_translationB = new glm::vec3(Y * 2, (480 - X) * 2, 0);
+	glm::mat4 Model = glm::translate(glm::mat4(1.0f), (const glm::vec3)*m_translationB);
+	glm::mat4 Scale = glm::scale(glm::mat4(1.0f), (const glm::vec3)*m_scaleB);
+	glm::mat4 Mvp = m_proj * Scale * Model;
+	m_shader->SetUniformMat4f("u_MVP", Mvp);
+	m_renderer.Draw(*m_va, *m_ib, *m_shader);
+	delete m_translationB;
+}
+
 void GraphicalInterface::WindowUpdate()
 {
 	m_renderer.Clear();
@@ -147,22 +161,24 @@ void GraphicalInterface::WindowUpdate()
 		m_shader->SetUniformMat4f("u_MVP", Mvp);
 		m_renderer.Draw(*m_va, *m_ib, *m_shader);
 	}
+	
 	for (auto& MapTile : m_tiles) 
 	{
-		m_sprites[MapTile.Type].Bind();
-		float X = (MapTile.X - m_playerPosition.X + 5) * g_disBetweenSquares + TILE_MIDDLE;
-		float Y = (MapTile.Y - m_playerPosition.Y + 6) * g_disBetweenSquares + TILE_MIDDLE;
-		m_translationB = new glm::vec3(Y * 2, (480 - X) * 2, 0);
-		glm::mat4 Model = glm::translate(glm::mat4(1.0f), (const glm::vec3)*m_translationB);
-		glm::mat4 Scale = glm::scale(glm::mat4(1.0f), (const glm::vec3)*m_scaleB);
-		glm::mat4 Mvp = m_proj * Scale * Model;
-		m_shader->SetUniformMat4f("u_MVP", Mvp);
-		m_renderer.Draw(*m_va, *m_ib, *m_shader); 
-		delete m_translationB;
+		DrawTile(MapTile);
+	}
+
+	for (auto& MapTile : m_entitiesToDraw)
+	{
+		DrawTile(MapTile);
 	}
 
 	GLCall(glfwSwapBuffers(m_window));
 	GLCall(glfwPollEvents());
+}
+
+void GraphicalInterface::NewEntitiesToDraw(const std::vector<TileToDraw>& NewEntities)
+{
+	m_entitiesToDraw = NewEntities;
 }
 
 void GraphicalInterface::NewTilesToDraw(const std::vector<TileToDraw>& NewTiles)
